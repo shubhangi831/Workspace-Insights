@@ -1,0 +1,12 @@
+{
+ "doctype": "Page",
+ "module": "Workspace Insights",
+ "name": "workspace-dashboard",
+ "page_name": "workspace-dashboard",
+ "title": "Workspace Dashboard",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}

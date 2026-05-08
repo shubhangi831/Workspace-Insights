@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:PI-{invoice_number}",
+ "creation": "2026-05-04 17:01:10.470791",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bill_to",
+  "invoice_number",
+  "invoice_date",
+  "due_date",
+  "billing_id",
+  "currency",
+  "invoice_amount",
+  "domain_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "bill_to",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bill to"
+  },
+  {
+   "fieldname": "invoice_number",
+   "fieldtype": "Data",
+   "label": "Invoice number"
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Invoice date"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Due date"
+  },
+  {
+   "fieldname": "billing_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Billing ID"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Select",
+   "label": "Currency",
+   "options": "INR"
+  },
+  {
+   "fieldname": "invoice_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Invoice amount"
+  },
+  {
+   "fieldname": "domain_details",
+   "fieldtype": "Table",
+   "label": "Domain Details",
+   "options": "Purchase Invoice Items"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-08 13:33:06.585191",
+ "modified_by": "Administrator",
+ "module": "Workspace Insights",
+ "name": "Purchase Invoice",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_views": 1
+}
