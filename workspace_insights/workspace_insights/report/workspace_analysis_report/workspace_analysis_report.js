@@ -1,7 +1,7 @@
 // frappe.query_reports["Workspace Analysis Report"] = {
 
 // 	onload: function (report) {
-// 		const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// 		const MO = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // 		function mkey(m) {
 // 			const [mon, yr] = (m || '').split(' ');
@@ -16,20 +16,14 @@
 // 			const style = document.createElement('style');
 // 			style.id = 'wa-report-style';
 // 			style.textContent = `
-
-// 				/* ── Filter bar gap ── */
-// 				.workspace-analysis-report .filters-area .filter-selector,
-// 				.page-form .col.layout-col {
-// 					margin-right: 16px !important;
-// 				}
-// 				.filters-area .form-group {
+// 				/* ── Filter gap fix ── */
+// 				/* ── Filter gap fix ── */
+// 				.page-form .frappe-control {
 // 					margin-right: 20px !important;
 // 				}
 
 // 				/* ── Custom domain dropdown ── */
-// 				.wa-select-wrap {
-// 					position: relative; display: inline-block; width: 100%;
-// 				}
+// 				.wa-select-wrap { position: relative; display: inline-block; width: 100%; }
 // 				.wa-select-display {
 // 					border: 1px solid var(--border-color, #d1d8dd);
 // 					border-radius: 6px; padding: 6px 32px 6px 10px;
@@ -77,7 +71,7 @@
 // 				.wa-options-list::-webkit-scrollbar { width: 4px; }
 // 				.wa-options-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
 
-// 				/* ── TOTAL row — sticky footer ── */
+// 				/* ── TOTAL row sticky footer ── */
 // 				.dt-scrollable .dt-row:last-child .dt-cell {
 // 					position: sticky !important;
 // 					bottom: 0 !important;
@@ -87,28 +81,14 @@
 // 					border-top: 2px solid #93c5fd !important;
 // 					box-shadow: 0 -3px 10px rgba(0,0,0,0.2) !important;
 // 				}
-
-// 				/* ── TOTAL row text — SARE cells white ── */
 // 				.dt-scrollable .dt-row:last-child .dt-cell .dt-cell__content,
-// 				.dt-scrollable .dt-row:last-child .dt-cell span,
-// 				.dt-scrollable .dt-row:last-child .dt-cell .wa-amt,
-// 				.dt-scrollable .dt-row:last-child .dt-cell .wa-profit-pos,
-// 				.dt-scrollable .dt-row:last-child .dt-cell .wa-profit-neg,
-// 				.dt-scrollable .dt-row:last-child .dt-cell .wa-margin-pos,
-// 				.dt-scrollable .dt-row:last-child .dt-cell .wa-margin-neg {
+// 				.dt-scrollable .dt-row:last-child .dt-cell span {
 // 					color: #ffffff !important;
 // 				}
-
-// 				/* ── TOTAL month cell — yellow ── */
 // 				.dt-scrollable .dt-row:last-child .dt-cell:first-child .dt-cell__content {
 // 					color: #fde68a !important;
 // 					letter-spacing: 0.5px !important;
 // 				}
-
-// 				/* ── Column header tints ── */
-// 				.wa-header-purchase .dt-cell__content { color: #1e40af !important; font-weight: 700 !important; }
-// 				.wa-header-sale     .dt-cell__content { color: #065f46 !important; font-weight: 700 !important; }
-// 				.wa-header-profit   .dt-cell__content { color: #5b21b6 !important; font-weight: 700 !important; }
 // 			`;
 // 			document.head.appendChild(style);
 // 		}
@@ -139,11 +119,11 @@
 // 			`);
 // 			$wrapper.append($wrap);
 
-// 			const $display  = $wrap.find('.wa-select-display');
+// 			const $display = $wrap.find('.wa-select-display');
 // 			const $dropdown = $wrap.find('.wa-select-dropdown');
-// 			const $search   = $wrap.find('.wa-search-input');
-// 			const $list     = $wrap.find('.wa-options-list');
-// 			let   selected  = '';
+// 			const $search = $wrap.find('.wa-search-input');
+// 			const $list = $wrap.find('.wa-options-list');
+// 			let selected = '';
 
 // 			function renderOptions(query) {
 // 				const q = (query || '').toLowerCase().trim();
@@ -175,8 +155,8 @@
 // 				$('.wa-select-dropdown').removeClass('open');
 // 				if (!isOpen) { $dropdown.addClass('open'); $search.focus(); }
 // 			});
-// 			$search.on('input',  () => renderOptions($search.val()));
-// 			$search.on('click',  e => e.stopPropagation());
+// 			$search.on('input', () => renderOptions($search.val()));
+// 			$search.on('click', e => e.stopPropagation());
 // 			$(document).off('click.wa-dd').on('click.wa-dd', () => {
 // 				$dropdown.removeClass('open');
 // 				$search.val('');
@@ -198,17 +178,11 @@
 
 // 				if (months.length) {
 // 					const opts = "\n" + months.join("\n");
-// 					const ff   = report.get_filter("from_month");
-// 					const tf   = report.get_filter("to_month");
+// 					const ff = report.get_filter("from_month");
+// 					const tf = report.get_filter("to_month");
 // 					if (ff) { ff.df.options = opts; ff.refresh(); ff.set_value(months[0]); }
 // 					if (tf) { tf.df.options = opts; tf.refresh(); tf.set_value(months[months.length - 1]); }
 // 				}
-
-// 				// ── Filter gap — inject margin after domain filter ──
-// 				setTimeout(() => {
-// 					const $filters = $('.page-form .frappe-control, .filters-area .frappe-control');
-// 					$filters.first().css('margin-right', '24px');
-// 				}, 500);
 // 			}
 // 		});
 // 	},
@@ -217,11 +191,10 @@
 // 	formatter: function (value, row, column, data, default_formatter) {
 // 		if (!data) return default_formatter(value, row, column, data);
 
-// 		const fn      = column.fieldname || '';
+// 		const fn = column.fieldname || '';
 // 		const isTotal = data.month === 'TOTAL';
-// 		const num     = parseFloat(value) || 0;
 
-// 		// ── Month column ─────────────────────────────────────────
+// 		// ── Month column — sirf yahan color ──────────────────────
 // 		if (fn === 'month') {
 // 			if (isTotal) {
 // 				return `<strong style="color:#fde68a;letter-spacing:.5px;">TOTAL</strong>`;
@@ -231,73 +204,31 @@
 // 				href="#">${value}</a>`;
 // 		}
 
-// 		// ── AMT columns — format as ₹ ────────────────────────────
-// 		if (fn.endsWith('_amt') && value !== null && value !== undefined) {
-// 			const formatted = '₹' + Math.abs(num).toLocaleString('en-IN', {
-// 				minimumFractionDigits: 2, maximumFractionDigits: 2
-// 			});
-// 			// Purchase = blue, Sale = green
-// 			const color = fn.startsWith('p_') ? '#1e40af' : '#065f46';
-// 			const cls   = fn.startsWith('p_') ? 'wa-amt-p' : 'wa-amt-s';
-// 			return `<span class="${cls}" style="color:${color};font-family:monospace;font-weight:500;">${formatted}</span>`;
-// 		}
-
-// 		// ── Profit column ────────────────────────────────────────
-// 		if (fn === 'profit' && value !== null && value !== undefined) {
-// 			const formatted = '₹' + Math.abs(num).toLocaleString('en-IN', {
-// 				minimumFractionDigits: 2, maximumFractionDigits: 2
-// 			});
-// 			// ✅ FIX: positive = green ▲, negative = red ▼
-// 			if (num >= 0) {
-// 				return `<span class="wa-profit-pos"
-// 					style="color:#059669;font-weight:700;font-family:monospace;">
-// 					▲ ${formatted}</span>`;
-// 			} else {
-// 				return `<span class="wa-profit-neg"
-// 					style="color:#dc2626;font-weight:700;font-family:monospace;">
-// 					▼ ${formatted}</span>`;
-// 			}
-// 		}
-
-// 		// ── Margin % column ──────────────────────────────────────
-// 		if (fn === 'margin_pct' && value !== null && value !== undefined) {
-// 			const abs = Math.abs(num).toFixed(2);
-// 			// ✅ FIX: positive = green ▲, negative = red ▼
-// 			if (num >= 0) {
-// 				return `<span class="wa-margin-pos"
-// 					style="color:#059669;font-weight:600;">
-// 					▲ ${abs}%</span>`;
-// 			} else {
-// 				return `<span class="wa-margin-neg"
-// 					style="color:#dc2626;font-weight:600;">
-// 					▼ ${abs}%</span>`;
-// 			}
-// 		}
-
+// 		// ── Baaki sab columns — default formatter, koi color nahi ──
 // 		return default_formatter(value, row, column, data);
 // 	},
 
 // 	filters: [
 // 		{
 // 			fieldname: "domain",
-// 			label:     __("Domain"),
+// 			label: __("Domain"),
 // 			fieldtype: "Data",
-// 			reqd:      1,
-// 			default:   ""
+// 			reqd: 1,
+// 			default: ""
 // 		},
 // 		{
 // 			fieldname: "from_month",
-// 			label:     __("From Month"),
+// 			label: __("From Month"),
 // 			fieldtype: "Select",
-// 			options:   "",
-// 			reqd:      0
+// 			options: "",
+// 			reqd: 0
 // 		},
 // 		{
 // 			fieldname: "to_month",
-// 			label:     __("To Month"),
+// 			label: __("To Month"),
 // 			fieldtype: "Select",
-// 			options:   "",
-// 			reqd:      0
+// 			options: "",
+// 			reqd: 0
 // 		}
 // 	]
 // };
@@ -319,17 +250,16 @@
 // 				return;
 // 			}
 
-// 			const rows     = r.message;
+// 			const rows = r.message;
 // 			const purchase = rows.filter(x => x.type === 'Purchase');
-// 			const sale     = rows.filter(x => x.type === 'Sale');
+// 			const sale = rows.filter(x => x.type === 'Sale');
 
 // 			const totalP = purchase.reduce((s, x) => s + parseFloat(x.amount || 0), 0);
 // 			const totalS = sale.reduce((s, x) => s + parseFloat(x.amount || 0), 0);
-// 			const profit = totalS - totalP;
-// 			const margin = totalS ? ((profit / totalS) * 100).toFixed(2) : '0.00';
+// 			const balance = totalP - totalS;
 
 // 			function fmt(n) {
-// 				const abs = Math.abs(n).toLocaleString('en-IN', {minimumFractionDigits:2});
+// 				const abs = Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2 });
 // 				return (n < 0 ? '-' : '') + '₹' + abs;
 // 			}
 
@@ -348,11 +278,10 @@
 // 					</thead>
 // 					<tbody>
 // 						${data.map((x, i) => `
-// 							<tr style="background:${i%2===0?'#fff':'#f8fafc'}">
+// 							<tr style="background:${i % 2 === 0 ? '#fff' : '#f8fafc'}">
 // 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${x.invoice_number}</td>
 // 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${x.subscription}</td>
-// 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;text-align:right;
-// 								    color:${color};font-family:monospace;">${fmt(x.amount)}</td>
+// 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;text-align:right;font-family:monospace;">${fmt(x.amount)}</td>
 // 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;text-align:right;">${x.quantity}</td>
 // 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">
 // 									<a href="/app/${urlPrefix}/${x.doc_name}" target="_blank"
@@ -364,12 +293,11 @@
 // 				</table>`;
 // 			}
 
-// 			const pColor = profit >= 0 ? '#059669' : '#dc2626';
-// 			const pArrow = profit >= 0 ? '▲' : '▼';
+// 			const bColor = balance > 0 ? '#dc2626' : '#059669';
+// 			const bArrow = balance > 0 ? '▲' : '▼';
 
 // 			const html = `<div style="font-size:13px;">
-// 				<!-- Summary cards -->
-// 				<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+// 				<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
 // 					<div style="background:#dbeafe;border-radius:8px;padding:12px;">
 // 						<div style="font-size:10px;color:#1e40af;font-weight:700;margin-bottom:4px;text-transform:uppercase;">Purchase</div>
 // 						<div style="font-size:17px;font-weight:700;color:#1e40af;font-family:monospace;">${fmt(totalP)}</div>
@@ -378,22 +306,16 @@
 // 						<div style="font-size:10px;color:#065f46;font-weight:700;margin-bottom:4px;text-transform:uppercase;">Sale</div>
 // 						<div style="font-size:17px;font-weight:700;color:#065f46;font-family:monospace;">${fmt(totalS)}</div>
 // 					</div>
-// 					<div style="background:#f5f3ff;border-radius:8px;padding:12px;">
-// 						<div style="font-size:10px;color:#5b21b6;font-weight:700;margin-bottom:4px;text-transform:uppercase;">Profit</div>
-// 						<div style="font-size:17px;font-weight:700;color:${pColor};font-family:monospace;">${pArrow} ${fmt(profit)}</div>
-// 					</div>
-// 					<div style="background:#fef3c7;border-radius:8px;padding:12px;">
-// 						<div style="font-size:10px;color:#92400e;font-weight:700;margin-bottom:4px;text-transform:uppercase;">Margin %</div>
-// 						<div style="font-size:17px;font-weight:700;color:${pColor};">${pArrow} ${margin}%</div>
+// 					<div style="background:#fef2f2;border-radius:8px;padding:12px;">
+// 						<div style="font-size:10px;color:#991b1b;font-weight:700;margin-bottom:4px;text-transform:uppercase;">Balance (P - S)</div>
+// 						<div style="font-size:17px;font-weight:700;color:${bColor};font-family:monospace;">${bArrow} ${fmt(balance)}</div>
 // 					</div>
 // 				</div>
 
-// 				<!-- Purchase table -->
 // 				<div style="font-size:11px;font-weight:700;color:#1e40af;text-transform:uppercase;
 // 				     letter-spacing:.6px;margin-bottom:6px;">🔵 Purchase Invoice</div>
 // 				${makeTable(purchase, '#1e40af', 'purchase-invoice')}
 
-// 				<!-- Sale table -->
 // 				<div style="font-size:11px;font-weight:700;color:#065f46;text-transform:uppercase;
 // 				     letter-spacing:.6px;margin:14px 0 6px;">🟢 Sale Invoice</div>
 // 				${makeTable(sale, '#065f46', 'sale-invoice')}
@@ -413,14 +335,12 @@
 
 
 
-
-
-
+// workspace_analysis_report.js
 
 frappe.query_reports["Workspace Analysis Report"] = {
 
 	onload: function (report) {
-		const MO = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+		const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 		function mkey(m) {
 			const [mon, yr] = (m || '').split(' ');
@@ -435,13 +355,10 @@ frappe.query_reports["Workspace Analysis Report"] = {
 			const style = document.createElement('style');
 			style.id = 'wa-report-style';
 			style.textContent = `
-				/* ── Filter gap fix ── */
-				/* ── Filter gap fix ── */
-				.page-form .frappe-control {
-					margin-right: 20px !important;
-				}
+				/* Filter gap */
+				.page-form .frappe-control { margin-right: 20px !important; }
 
-				/* ── Custom domain dropdown ── */
+				/* Domain dropdown */
 				.wa-select-wrap { position: relative; display: inline-block; width: 100%; }
 				.wa-select-display {
 					border: 1px solid var(--border-color, #d1d8dd);
@@ -473,7 +390,7 @@ frappe.query_reports["Workspace Analysis Report"] = {
 					display: flex; align-items: center; gap: 7px;
 					background: var(--control-bg, #f9f9f9);
 				}
-				.wa-search-box svg { flex-shrink: 0; color: var(--text-muted,#8d99a6); }
+				.wa-search-box svg { flex-shrink:0; color: var(--text-muted,#8d99a6); }
 				.wa-search-input {
 					border: none; outline: none; background: transparent;
 					font-size: 13px; width: 100%; color: var(--text-color,#333);
@@ -490,7 +407,7 @@ frappe.query_reports["Workspace Analysis Report"] = {
 				.wa-options-list::-webkit-scrollbar { width: 4px; }
 				.wa-options-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
 
-				/* ── TOTAL row sticky footer ── */
+				/* TOTAL sticky footer */
 				.dt-scrollable .dt-row:last-child .dt-cell {
 					position: sticky !important;
 					bottom: 0 !important;
@@ -508,11 +425,16 @@ frappe.query_reports["Workspace Analysis Report"] = {
 					color: #fde68a !important;
 					letter-spacing: 0.5px !important;
 				}
+
+				/* Column header color by prefix */
+				.wa-hdr-p .dt-cell__content { color: #1e40af !important; font-weight: 700 !important; }
+				.wa-hdr-s .dt-cell__content { color: #065f46 !important; font-weight: 700 !important; }
+				.wa-hdr-b .dt-cell__content { color: #5b21b6 !important; font-weight: 700 !important; }
 			`;
 			document.head.appendChild(style);
 		}
 
-		// ── Custom searchable dropdown ────────────────────────────
+		// ── Custom domain dropdown ────────────────────────────────
 		function buildCustomSelect(filter, allOptions, placeholder) {
 			const $wrapper = filter.$wrapper;
 			$wrapper.find('input, select').hide();
@@ -538,11 +460,11 @@ frappe.query_reports["Workspace Analysis Report"] = {
 			`);
 			$wrapper.append($wrap);
 
-			const $display = $wrap.find('.wa-select-display');
+			const $display  = $wrap.find('.wa-select-display');
 			const $dropdown = $wrap.find('.wa-select-dropdown');
-			const $search = $wrap.find('.wa-search-input');
-			const $list = $wrap.find('.wa-options-list');
-			let selected = '';
+			const $search   = $wrap.find('.wa-search-input');
+			const $list     = $wrap.find('.wa-options-list');
+			let   selected  = '';
 
 			function renderOptions(query) {
 				const q = (query || '').toLowerCase().trim();
@@ -574,8 +496,8 @@ frappe.query_reports["Workspace Analysis Report"] = {
 				$('.wa-select-dropdown').removeClass('open');
 				if (!isOpen) { $dropdown.addClass('open'); $search.focus(); }
 			});
-			$search.on('input', () => renderOptions($search.val()));
-			$search.on('click', e => e.stopPropagation());
+			$search.on('input',  () => renderOptions($search.val()));
+			$search.on('click',  e => e.stopPropagation());
 			$(document).off('click.wa-dd').on('click.wa-dd', () => {
 				$dropdown.removeClass('open');
 				$search.val('');
@@ -597,8 +519,8 @@ frappe.query_reports["Workspace Analysis Report"] = {
 
 				if (months.length) {
 					const opts = "\n" + months.join("\n");
-					const ff = report.get_filter("from_month");
-					const tf = report.get_filter("to_month");
+					const ff   = report.get_filter("from_month");
+					const tf   = report.get_filter("to_month");
 					if (ff) { ff.df.options = opts; ff.refresh(); ff.set_value(months[0]); }
 					if (tf) { tf.df.options = opts; tf.refresh(); tf.set_value(months[months.length - 1]); }
 				}
@@ -606,53 +528,76 @@ frappe.query_reports["Workspace Analysis Report"] = {
 		});
 	},
 
+	// ── Column header color after render ─────────────────────────
+	after_datatable_render: function (datatable) {
+		setTimeout(() => {
+			$(datatable.wrapper).find('.dt-cell--header').each(function () {
+				const label = $(this).find('.dt-cell__content').text().trim();
+				if (label.startsWith('P |')) {
+					$(this).css({ 'background': '#eff6ff', 'border-bottom': '2px solid #93c5fd' });
+					$(this).find('.dt-cell__content').css({ 'color': '#1e40af', 'font-weight': '700' });
+				} else if (label.startsWith('S |')) {
+					$(this).css({ 'background': '#ecfdf5', 'border-bottom': '2px solid #6ee7b7' });
+					$(this).find('.dt-cell__content').css({ 'color': '#065f46', 'font-weight': '700' });
+				} else if (label.includes('Balance')) {
+					$(this).css({ 'background': '#f5f3ff', 'border-bottom': '2px solid #c4b5fd' });
+					$(this).find('.dt-cell__content').css({ 'color': '#5b21b6', 'font-weight': '700' });
+				}
+			});
+		}, 300);
+	},
+
 	// ── Formatter ────────────────────────────────────────────────
 	formatter: function (value, row, column, data, default_formatter) {
 		if (!data) return default_formatter(value, row, column, data);
 
-		const fn = column.fieldname || '';
+		const fn      = column.fieldname || '';
 		const isTotal = data.month === 'TOTAL';
+		const num     = parseFloat(value) || 0;
 
-		// ── Month column — sirf yahan color ──────────────────────
+		// ── Month column ─────────────────────────────────────────
 		if (fn === 'month') {
 			if (isTotal) {
 				return `<strong style="color:#fde68a;letter-spacing:.5px;">TOTAL</strong>`;
 			}
 			return `<a style="color:#1a56db;text-decoration:none;font-weight:600;cursor:pointer;"
 				onclick="event.preventDefault();wa_show_month_detail('${data.month}')"
-				href="#">${value}</a>`;
+				href="#">${data.month}</a>`;
 		}
 
-		// ── Baaki sab columns — default formatter, koi color nahi ──
+		// ── Purchase AMT — blue ───────────────────────────────────
+		if (fn.startsWith('p_') && fn.endsWith('_amt') && value) {
+			const formatted = '₹' + num.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+			return `<span style="color:#1e40af;font-family:monospace;">${formatted}</span>`;
+		}
+
+		// ── Sale AMT — green ─────────────────────────────────────
+		if (fn.startsWith('s_') && fn.endsWith('_amt') && value) {
+			const formatted = '₹' + num.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+			return `<span style="color:#065f46;font-family:monospace;">${formatted}</span>`;
+		}
+
+		// ── Balance column ───────────────────────────────────────
+		if (fn === 'balance' && value !== null && value !== undefined) {
+			const formatted = '₹' + Math.abs(num).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+			if (num >= 0) {
+				return `<span style="color:#059669;font-weight:700;font-family:monospace;">▲ ${formatted}</span>`;
+			} else {
+				return `<span style="color:#dc2626;font-weight:700;font-family:monospace;">▼ ${formatted}</span>`;
+			}
+		}
+
 		return default_formatter(value, row, column, data);
 	},
 
 	filters: [
-		{
-			fieldname: "domain",
-			label: __("Domain"),
-			fieldtype: "Data",
-			reqd: 1,
-			default: ""
-		},
-		{
-			fieldname: "from_month",
-			label: __("From Month"),
-			fieldtype: "Select",
-			options: "",
-			reqd: 0
-		},
-		{
-			fieldname: "to_month",
-			label: __("To Month"),
-			fieldtype: "Select",
-			options: "",
-			reqd: 0
-		}
+		{ fieldname: "domain",     label: __("Domain"),     fieldtype: "Data",   reqd: 1, default: "" },
+		{ fieldname: "from_month", label: __("From Month"), fieldtype: "Select", options: "", reqd: 0 },
+		{ fieldname: "to_month",   label: __("To Month"),   fieldtype: "Select", options: "", reqd: 0 }
 	]
 };
 
-// ── Month detail popup ────────────────────────────────────────────
+// ── Month detail popup ───────────────────────────────────────────
 window.wa_show_month_detail = function (month) {
 	const domain = frappe.query_report.get_filter_value('domain');
 	if (!domain) {
@@ -669,21 +614,21 @@ window.wa_show_month_detail = function (month) {
 				return;
 			}
 
-			const rows = r.message;
+			const rows     = r.message;
 			const purchase = rows.filter(x => x.type === 'Purchase');
-			const sale = rows.filter(x => x.type === 'Sale');
+			const sale     = rows.filter(x => x.type === 'Sale');
 
-			const totalP = purchase.reduce((s, x) => s + parseFloat(x.amount || 0), 0);
-			const totalS = sale.reduce((s, x) => s + parseFloat(x.amount || 0), 0);
-			const balance = totalP - totalS;
+			const totalP  = purchase.reduce((s, x) => s + parseFloat(x.amount || 0), 0);
+			const totalS  = sale.reduce((s, x) => s + parseFloat(x.amount || 0), 0);
+			const balance = totalS - totalP;
 
 			function fmt(n) {
-				const abs = Math.abs(n).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+				const abs = Math.abs(n).toLocaleString('en-IN', {minimumFractionDigits:2});
 				return (n < 0 ? '-' : '') + '₹' + abs;
 			}
 
 			function makeTable(data, color, urlPrefix) {
-				if (!data.length) return `<p style="color:#9ca3af;font-size:12px;padding:8px;">No data found</p>`;
+				if (!data.length) return `<p style="color:#9ca3af;font-size:12px;padding:8px;">No data</p>`;
 				return `
 				<table style="width:100%;border-collapse:collapse;font-size:12px;">
 					<thead>
@@ -697,10 +642,11 @@ window.wa_show_month_detail = function (month) {
 					</thead>
 					<tbody>
 						${data.map((x, i) => `
-							<tr style="background:${i % 2 === 0 ? '#fff' : '#f8fafc'}">
+							<tr style="background:${i%2===0?'#fff':'#f8fafc'}">
 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${x.invoice_number}</td>
 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">${x.subscription}</td>
-								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;text-align:right;font-family:monospace;">${fmt(x.amount)}</td>
+								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;text-align:right;
+								    color:${color};font-family:monospace;">${fmt(x.amount)}</td>
 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;text-align:right;">${x.quantity}</td>
 								<td style="padding:6px 10px;border-bottom:1px solid #e2e8f0;">
 									<a href="/app/${urlPrefix}/${x.doc_name}" target="_blank"
@@ -712,21 +658,21 @@ window.wa_show_month_detail = function (month) {
 				</table>`;
 			}
 
-			const bColor = balance > 0 ? '#dc2626' : '#059669';
-			const bArrow = balance > 0 ? '▲' : '▼';
+			const bColor = balance >= 0 ? '#059669' : '#dc2626';
+			const bArrow = balance >= 0 ? '▲' : '▼';
 
 			const html = `<div style="font-size:13px;">
 				<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;">
 					<div style="background:#dbeafe;border-radius:8px;padding:12px;">
-						<div style="font-size:10px;color:#1e40af;font-weight:700;margin-bottom:4px;text-transform:uppercase;">Purchase</div>
+						<div style="font-size:10px;color:#1e40af;font-weight:700;margin-bottom:4px;">🔵 PURCHASE</div>
 						<div style="font-size:17px;font-weight:700;color:#1e40af;font-family:monospace;">${fmt(totalP)}</div>
 					</div>
 					<div style="background:#d1fae5;border-radius:8px;padding:12px;">
-						<div style="font-size:10px;color:#065f46;font-weight:700;margin-bottom:4px;text-transform:uppercase;">Sale</div>
+						<div style="font-size:10px;color:#065f46;font-weight:700;margin-bottom:4px;">🟢 SALE</div>
 						<div style="font-size:17px;font-weight:700;color:#065f46;font-family:monospace;">${fmt(totalS)}</div>
 					</div>
-					<div style="background:#fef2f2;border-radius:8px;padding:12px;">
-						<div style="font-size:10px;color:#991b1b;font-weight:700;margin-bottom:4px;text-transform:uppercase;">Balance (P - S)</div>
+					<div style="background:#f5f3ff;border-radius:8px;padding:12px;">
+						<div style="font-size:10px;color:#5b21b6;font-weight:700;margin-bottom:4px;">⚖️ BALANCE (S-P)</div>
 						<div style="font-size:17px;font-weight:700;color:${bColor};font-family:monospace;">${bArrow} ${fmt(balance)}</div>
 					</div>
 				</div>
@@ -748,6 +694,19 @@ window.wa_show_month_detail = function (month) {
 		}
 	});
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

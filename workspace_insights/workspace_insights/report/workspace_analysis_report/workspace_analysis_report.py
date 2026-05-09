@@ -1,6 +1,3 @@
-# # workspace_analysis_report.py
-# # Consolidated: Purchase Invoice + Sale Invoice + Profit/Margin
-
 # import frappe
 # from frappe import _
 
@@ -184,13 +181,13 @@
 #         "width":     110
 #     }]
 
-#     # Purchase columns — Float fieldtype (no wrong currency symbol)
+#     # Purchase columns
 #     for sub in p_subs_list:
 #         safe = "p_" + sub.lower().replace(" ", "_")
 #         columns.append({
 #             "label":     _(sub + " AMT"),
 #             "fieldname": safe + "_amt",
-#             "fieldtype": "Float",       # ✅ Float — ₹ JS mein format karega
+#             "fieldtype": "Float",
 #             "width":     160,
 #             "precision": 2
 #         })
@@ -207,7 +204,7 @@
 #         columns.append({
 #             "label":     _(sub + " AMT"),
 #             "fieldname": safe + "_amt",
-#             "fieldtype": "Float",       # ✅ Float
+#             "fieldtype": "Float",
 #             "width":     160,
 #             "precision": 2
 #         })
@@ -218,19 +215,12 @@
 #             "width":     80
 #         })
 
-#     # Profit & Margin
+#     # Balance column (Purchase - Sale)
 #     columns.append({
-#         "label":     _("Profit"),
-#         "fieldname": "profit",
-#         "fieldtype": "Float",           # ✅ Float
-#         "width":     150,
-#         "precision": 2
-#     })
-#     columns.append({
-#         "label":     _("Margin %"),
-#         "fieldname": "margin_pct",
+#         "label":     _("Balance"),
+#         "fieldname": "balance",
 #         "fieldtype": "Float",
-#         "width":     110,
+#         "width":     150,
 #         "precision": 2
 #     })
 
@@ -240,8 +230,7 @@
 #     gp_lic  = {sub: 0   for sub in p_subs_list}
 #     gs_amt  = {sub: 0.0 for sub in s_subs_list}
 #     gs_lic  = {sub: 0   for sub in s_subs_list}
-#     g_profit = 0.0
-#     g_sale   = 0.0
+#     g_balance = 0.0
 
 #     for month in all_months:
 #         row  = {"month": month}
@@ -268,13 +257,9 @@
 #             if cl["qty"]: gs_lic[sub] = cl["qty"]
 #             mt_s += cl["amt"]
 
-#         profit     = mt_s - mt_p
-#         margin_pct = round((profit / mt_s * 100), 2) if mt_s else 0.0
-
-#         row["profit"]     = profit
-#         row["margin_pct"] = margin_pct
-#         g_profit += profit
-#         g_sale   += mt_s
+#         balance = mt_p - mt_s
+#         row["balance"] = balance
+#         g_balance += balance
 #         data.append(row)
 
 #     # ── Total row ─────────────────────────────────────────────────
@@ -288,8 +273,7 @@
 #         total_row[safe + "_amt"] = gs_amt[sub]
 #         total_row[safe + "_lic"] = gs_lic[sub]
 
-#     total_row["profit"]     = g_profit
-#     total_row["margin_pct"] = round((g_profit / g_sale * 100), 2) if g_sale else 0.0
+#     total_row["balance"] = g_balance
 #     data.append(total_row)
 
 #     return columns, data
@@ -300,8 +284,14 @@
 
 
 
+
+
+
+# workspace_analysis_report.py
+
 import frappe
 from frappe import _
+import re
 
 MONTH_ORDER = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -317,6 +307,20 @@ def month_key(m):
         return yr * 100 + mon
     except Exception:
         return 0
+
+
+def clean_sub(raw):
+    """
+    Clean subscription name:
+    'Google Workspace Business Starter' → 'Business Starter'
+    'Google Worspace Business Starter'  → 'Business Starter'  (typo bhi handle)
+    'G Suite Basic'                     → 'G Suite Basic'
+    """
+    s = (raw or "").strip()
+    # Remove any variation of "Google Workspace" or "Google Worspace" (typo)
+    s = re.sub(r'(?i)google\s+wor[ks]pace\s+', '', s).strip()
+    # Remove "G Suite " prefix if needed (keep as is)
+    return s
 
 
 @frappe.whitelist()
@@ -431,8 +435,8 @@ def fetch_pivot(parent_table, child_table, domain, from_key, to_key):
         if to_key and mk > to_key:
             continue
 
-        sub = (row.subscription or "").strip()
-        sub = sub.replace("Google Workspace ", "").replace("G Suite ", "G Suite ")
+        # ✅ FIX: regex se clean karo — typo bhi handle hoga
+        sub = clean_sub(row.subscription)
 
         pivot.setdefault(month, {})
         pivot[month][sub] = {
@@ -476,50 +480,54 @@ def execute(filters=None):
     s_subs_list = sorted(s_subs)
 
     # ── Columns ──────────────────────────────────────────────────
+    # Column label mein prefix lagao taaki grouping clear ho
+    # 🔵 P | = Purchase group
+    # 🟢 S | = Sale group
+
     columns = [{
         "label":     _("Month"),
         "fieldname": "month",
         "fieldtype": "Data",
-        "width":     110
+        "width":     120
     }]
 
-    # Purchase columns
+    # ── Purchase columns — "P | Sub AMT" format ──
     for sub in p_subs_list:
         safe = "p_" + sub.lower().replace(" ", "_")
         columns.append({
-            "label":     _(sub + " AMT"),
+            "label":     _("P | " + sub + " AMT"),
             "fieldname": safe + "_amt",
             "fieldtype": "Float",
-            "width":     160,
+            "width":     170,
             "precision": 2
         })
         columns.append({
-            "label":     _(sub + " LIC"),
+            "label":     _("P | " + sub + " LIC"),
             "fieldname": safe + "_lic",
             "fieldtype": "Int",
-            "width":     80
+            "width":     90
         })
 
-    # Sale columns
+    # ── Sale columns — "S | Sub AMT" format ──
     for sub in s_subs_list:
         safe = "s_" + sub.lower().replace(" ", "_")
         columns.append({
-            "label":     _(sub + " AMT"),
+            "label":     _("S | " + sub + " AMT"),
             "fieldname": safe + "_amt",
             "fieldtype": "Float",
-            "width":     160,
+            "width":     170,
             "precision": 2
         })
         columns.append({
-            "label":     _(sub + " LIC"),
+            "label":     _("S | " + sub + " LIC"),
             "fieldname": safe + "_lic",
             "fieldtype": "Int",
-            "width":     80
+            "width":     90
         })
 
-    # Balance column (Purchase - Sale)
+    # ── Balance column ──
     columns.append({
-        "label":     _("Balance"),
+        "label":     _("Balance (S - P)"),
         "fieldname": "balance",
         "fieldtype": "Float",
         "width":     150,
@@ -527,11 +535,11 @@ def execute(filters=None):
     })
 
     # ── Data rows ─────────────────────────────────────────────────
-    data    = []
-    gp_amt  = {sub: 0.0 for sub in p_subs_list}
-    gp_lic  = {sub: 0   for sub in p_subs_list}
-    gs_amt  = {sub: 0.0 for sub in s_subs_list}
-    gs_lic  = {sub: 0   for sub in s_subs_list}
+    data      = []
+    gp_amt    = {sub: 0.0 for sub in p_subs_list}
+    gp_lic    = {sub: 0   for sub in p_subs_list}
+    gs_amt    = {sub: 0.0 for sub in s_subs_list}
+    gs_lic    = {sub: 0   for sub in s_subs_list}
     g_balance = 0.0
 
     for month in all_months:
@@ -544,8 +552,8 @@ def execute(filters=None):
         for sub in p_subs_list:
             safe = "p_" + sub.lower().replace(" ", "_")
             cl   = pm.get(sub, {"amt": 0.0, "qty": 0})
-            row[safe + "_amt"] = cl["amt"]
-            row[safe + "_lic"] = cl["qty"]
+            row[safe + "_amt"] = cl["amt"] if cl["amt"] else None
+            row[safe + "_lic"] = cl["qty"] if cl["qty"] else None
             gp_amt[sub] += cl["amt"]
             if cl["qty"]: gp_lic[sub] = cl["qty"]
             mt_p += cl["amt"]
@@ -553,15 +561,16 @@ def execute(filters=None):
         for sub in s_subs_list:
             safe = "s_" + sub.lower().replace(" ", "_")
             cl   = sm.get(sub, {"amt": 0.0, "qty": 0})
-            row[safe + "_amt"] = cl["amt"]
-            row[safe + "_lic"] = cl["qty"]
+            row[safe + "_amt"] = cl["amt"] if cl["amt"] else None
+            row[safe + "_lic"] = cl["qty"] if cl["qty"] else None
             gs_amt[sub] += cl["amt"]
             if cl["qty"]: gs_lic[sub] = cl["qty"]
             mt_s += cl["amt"]
 
-        balance = mt_p - mt_s
+        # Balance = Sale - Purchase (positive = profit)
+        balance        = mt_s - mt_p
         row["balance"] = balance
-        g_balance += balance
+        g_balance     += balance
         data.append(row)
 
     # ── Total row ─────────────────────────────────────────────────
@@ -579,8 +588,4 @@ def execute(filters=None):
     data.append(total_row)
 
     return columns, data
-
-
-
-
 

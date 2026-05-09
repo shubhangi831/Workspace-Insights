@@ -156,65 +156,156 @@ def safe_int(raw):
 		return 0
 
 
+# def parse_date(raw):
+# 	"""
+# 	Handles both formats:
+# 	  '31 Jan 2025'  → '2025-01-31'
+# 	  '31-Mar-26'    → '2026-03-31'
+# 	  '31-Mar-2026'  → '2026-03-31'
+# 	"""
+# 	if not raw:
+# 		return None
+# 	raw = raw.strip()
+# 	months = {
+# 		'Jan':'01','Feb':'02','Mar':'03','Apr':'04',
+# 		'May':'05','Jun':'06','Jul':'07','Aug':'08',
+# 		'Sep':'09','Oct':'10','Nov':'11','Dec':'12'
+# 	}
+# 	# Format: "31-Mar-26" or "31-Mar-2026"
+# 	if '-' in raw:
+# 		parts = raw.split('-')
+# 		if len(parts) == 3:
+# 			day = parts[0].zfill(2)
+# 			mon = months.get(parts[1], '01')
+# 			yr  = parts[2] if len(parts[2]) == 4 else '20' + parts[2]
+# 			return f"{yr}-{mon}-{day}"
+# 	# Format: "31 Jan 2025"
+# 	parts = raw.split()
+# 	if len(parts) == 3:
+# 		return f"{parts[2]}-{months.get(parts[1], '01')}-{parts[0].zfill(2)}"
+# 	return None
+
 def parse_date(raw):
-	"""
-	Handles both formats:
-	  '31 Jan 2025'  → '2025-01-31'
-	  '31-Mar-26'    → '2026-03-31'
-	  '31-Mar-2026'  → '2026-03-31'
-	"""
-	if not raw:
-		return None
-	raw = raw.strip()
-	months = {
-		'Jan':'01','Feb':'02','Mar':'03','Apr':'04',
-		'May':'05','Jun':'06','Jul':'07','Aug':'08',
-		'Sep':'09','Oct':'10','Nov':'11','Dec':'12'
-	}
-	# Format: "31-Mar-26" or "31-Mar-2026"
-	if '-' in raw:
-		parts = raw.split('-')
-		if len(parts) == 3:
-			day = parts[0].zfill(2)
-			mon = months.get(parts[1], '01')
-			yr  = parts[2] if len(parts[2]) == 4 else '20' + parts[2]
-			return f"{yr}-{mon}-{day}"
-	# Format: "31 Jan 2025"
-	parts = raw.split()
-	if len(parts) == 3:
-		return f"{parts[2]}-{months.get(parts[1], '01')}-{parts[0].zfill(2)}"
-	return None
+    """
+    Handles multiple formats:
+      '30-Sep-25'    → '2025-09-30'
+      '30-Sep-2025'  → '2025-09-30'
+      '30/09/2025'   → '2025-09-30'
+      '30 Sep 2025'  → '2025-09-30'
+    """
+    if not raw:
+        return None
+    raw = raw.strip()
+    months = {
+        'Jan':'01','Feb':'02','Mar':'03','Apr':'04',
+        'May':'05','Jun':'06','Jul':'07','Aug':'08',
+        'Sep':'09','Oct':'10','Nov':'11','Dec':'12'
+    }
+
+    # Hyphen format: "30-Sep-25" or "30-Sep-2025"
+    if '-' in raw:
+        parts = raw.split('-')
+        if len(parts) == 3:
+            day = parts[0].zfill(2)
+            # ✅ FIX: normalize month abbreviation (handles "Sept" or "September")
+            mon = months.get(parts[1][:3].title(), parts[1].zfill(2))
+            yr  = parts[2]
+            if len(yr) == 2:
+                yr = '20' + yr
+            return f"{yr}-{mon}-{day}"
+
+    # Slash format: "30/09/2025"
+    if '/' in raw:
+        parts = raw.split('/')
+        if len(parts) == 3:
+            day = parts[0].zfill(2)
+            mon = parts[1].zfill(2)
+            yr  = parts[2]
+            if len(yr) == 2:
+                yr = '20' + yr
+            return f"{yr}-{mon}-{day}"
+
+    # Space format: "30 Sep 2025"
+    parts = raw.split()
+    if len(parts) == 3:
+        day = parts[0].zfill(2)
+        mon = months.get(parts[1][:3].title(), '01')
+        yr  = parts[2]
+        if len(yr) == 2:
+            yr = '20' + yr
+        return f"{yr}-{mon}-{day}"
+
+    return None
+
+
+
+
+
+# def parse_date_short(raw, invoice_date_str):
+# 	"""
+# 	Handles both formats:
+# 	  '01-Mar'  → '2026-03-01'
+# 	  '1 Jan'   → '2025-01-01'
+# 	"""
+# 	if not raw or not raw.strip():
+# 		return None
+# 	raw = raw.strip()
+# 	months = {
+# 		'Jan':'01','Feb':'02','Mar':'03','Apr':'04',
+# 		'May':'05','Jun':'06','Jul':'07','Aug':'08',
+# 		'Sep':'09','Oct':'10','Nov':'11','Dec':'12'
+# 	}
+# 	year = invoice_date_str[:4] if invoice_date_str and len(invoice_date_str) >= 4 else nowdate()[:4]
+
+# 	# Format: "01-Mar"
+# 	if '-' in raw:
+# 		parts = raw.split('-')
+# 		if len(parts) == 2:
+# 			day = parts[0].zfill(2)
+# 			mon = months.get(parts[1], '01')
+# 			return f"{year}-{mon}-{day}"
+# 	# Format: "1 Jan"
+# 	parts = raw.split()
+# 	if len(parts) == 2:
+# 		return f"{year}-{months.get(parts[1], '01')}-{parts[0].zfill(2)}"
+# 	return None
 
 
 def parse_date_short(raw, invoice_date_str):
-	"""
-	Handles both formats:
-	  '01-Mar'  → '2026-03-01'
-	  '1 Jan'   → '2025-01-01'
-	"""
-	if not raw or not raw.strip():
-		return None
-	raw = raw.strip()
-	months = {
-		'Jan':'01','Feb':'02','Mar':'03','Apr':'04',
-		'May':'05','Jun':'06','Jul':'07','Aug':'08',
-		'Sep':'09','Oct':'10','Nov':'11','Dec':'12'
-	}
-	year = invoice_date_str[:4] if invoice_date_str and len(invoice_date_str) >= 4 else nowdate()[:4]
+    """
+    Handles both formats:
+      '01-Mar'  → '2026-03-01'
+      '1 Jan'   → '2025-01-01'
+      '11-Sept' → '2025-09-11'
+    """
+    if not raw or not raw.strip():
+        return None
+    raw = raw.strip()
+    months = {
+        'Jan':'01','Feb':'02','Mar':'03','Apr':'04',
+        'May':'05','Jun':'06','Jul':'07','Aug':'08',
+        'Sep':'09','Oct':'10','Nov':'11','Dec':'12'
+    }
+    year = invoice_date_str[:4] if invoice_date_str and len(invoice_date_str) >= 4 else nowdate()[:4]
 
-	# Format: "01-Mar"
-	if '-' in raw:
-		parts = raw.split('-')
-		if len(parts) == 2:
-			day = parts[0].zfill(2)
-			mon = months.get(parts[1], '01')
-			return f"{year}-{mon}-{day}"
-	# Format: "1 Jan"
-	parts = raw.split()
-	if len(parts) == 2:
-		return f"{year}-{months.get(parts[1], '01')}-{parts[0].zfill(2)}"
-	return None
+    # Hyphen format: "01-Mar" or "11-Sept"
+    if '-' in raw:
+        parts = raw.split('-')
+        if len(parts) == 2:
+            day = parts[0].zfill(2)
+            # ✅ FIX: normalize month abbreviation (handles "Sept" or "September")
+            mon = months.get(parts[1][:3].title(), '01')
+            return f"{year}-{mon}-{day}"
 
+    # Space format: "1 Jan" or "11 Sept"
+    parts = raw.split()
+    if len(parts) == 2:
+        day = parts[0].zfill(2)
+        # ✅ FIX: same normalization for space-separated format
+        mon = months.get(parts[1][:3].title(), '01')
+        return f"{year}-{mon}-{day}"
+
+    return None
 
 
 
