@@ -23,9 +23,10 @@
  "fields": [
   {
    "fieldname": "domain",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Domain"
+   "label": "Domain",
+   "options": "Domains"
   },
   {
    "fieldname": "subscription",
@@ -95,7 +96,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-05-08 18:10:51.688922",
+ "modified": "2026-05-12 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Workspace Insights",
  "name": "Purchase Invoice Items",

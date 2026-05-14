@@ -1,13 +1,16 @@
 // frappe.listview_settings['Purchase Invoice'] = {
-// 	onload: function(listview) {
-// 		listview.page.add_inner_button(__('Import'), function() {
+// 	onload: function (listview) {
+// 		listview.page.add_button(__('Import'), function () {
 // 			show_import_dialog(listview);
-// 		});
+// 		}, { btn_class: 'btn-default' });
+
 // 	}
 // };
 
+
 // function show_import_dialog(listview) {
 
+// 	// ── Inject CSS once ──────────────────────────────────────────
 // 	if (!document.getElementById('ws-imp-style')) {
 // 		const st = document.createElement('style');
 // 		st.id = 'ws-imp-style';
@@ -30,14 +33,12 @@
 // 			display: inline-block; position: relative;
 // 			border: 1.5px solid #1a56db; border-radius: 6px;
 // 			padding: 9px 24px; font-size: 13px; font-weight: 600;
-// 			color: #1a56db; background: #fff; cursor: pointer;
-// 			transition: all .15s;
+// 			color: #1a56db; background: #fff; cursor: pointer; transition: all .15s;
 // 		}
 // 		.ws-choose-label:hover { background: #1a56db; color: #fff; }
 // 		.ws-choose-label input[type=file] {
 // 			position: absolute; top: 0; left: 0;
-// 			width: 100%; height: 100%;
-// 			opacity: 0; cursor: pointer;
+// 			width: 100%; height: 100%; opacity: 0; cursor: pointer;
 // 		}
 // 		.ws-files-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
 // 		.ws-file-item {
@@ -57,14 +58,12 @@
 // 		.ws-add-more {
 // 			border: 1.5px dashed #93c5fd; border-radius: 8px; padding: 10px;
 // 			text-align: center; color: #1a56db; font-size: 13px; font-weight: 600;
-// 			background: #eff6ff; transition: all .15s; cursor: pointer;
-// 			position: relative;
+// 			background: #eff6ff; transition: all .15s; cursor: pointer; position: relative;
 // 		}
 // 		.ws-add-more:hover { background: #dbeafe; }
 // 		.ws-add-more input[type=file] {
 // 			position: absolute; top: 0; left: 0;
-// 			width: 100%; height: 100%;
-// 			opacity: 0; cursor: pointer;
+// 			width: 100%; height: 100%; opacity: 0; cursor: pointer;
 // 		}
 // 		.ws-prog-wrap { display: none; margin-bottom: 12px; }
 // 		.ws-prog-wrap.show { display: block; }
@@ -80,7 +79,7 @@
 // 	}
 
 // 	let sel_files = [];
-// 	let importing = false; // import chal raha hai ya nahi
+// 	let d_wrapper = null;
 
 // 	const d = new frappe.ui.Dialog({
 // 		title: 'Import Workspace Invoice',
@@ -100,7 +99,7 @@
 // 					<div class="ws-drop-title">Upload CSV File(s)</div>
 // 					<div class="ws-drop-sub">
 // 						Drag &amp; drop files here, or click below<br>
-// 						<small style="color:#9ca3af">Ek ya ek se zyada .csv files select kar sakte hain</small>
+// 						<small style="color:#9ca3af">One or more .csv files can be selected</small>
 // 					</div>
 // 					<label class="ws-choose-label">
 // 						📂 Choose Files
@@ -113,54 +112,49 @@
 // 					<div class="ws-prog-bg"><div class="ws-prog-bar" id="ws-prog-bar"></div></div>
 // 				</div>
 // 				<div class="ws-note">
-// 					<b>Note:</b> Sirf Google Workspace invoice CSV supported hai &nbsp;·&nbsp;
-// 					Duplicate invoice automatically skip ho jayegi
+// 					<b>Note:</b> Only Google Workspace invoice CSV is supported &nbsp;·&nbsp;
+// 					Duplicate invoices are automatically skipped
 // 				</div>
 // 			</div>
 // 			`
 // 		}],
 // 		primary_action_label: 'Import',
-// 		primary_action: function() {
+// 		primary_action: function () {
 // 			if (!sel_files.length) {
-// 				frappe.show_alert({ message: 'Pehle CSV file(s) select karo!', indicator: 'orange' }, 4);
+// 				frappe.show_alert({ message: 'Please select CSV file(s) first!', indicator: 'orange' }, 4);
 // 				return;
 // 			}
 // 			run_import();
 // 		},
 // 		secondary_action_label: 'Cancel',
-// 		secondary_action: function() { d.hide(); }
+// 		secondary_action: function () { d.hide(); }
 // 	});
 
-// 	// ── onhide: sirf tab clear karo jab import nahi chal raha ──
-// 	d.onhide = function() {
-// 		if (!importing) {
-// 			sel_files = [];
-// 		}
-// 	};
-
+// 	d.onhide = function () { sel_files = []; };
 // 	d.show();
+// 	d_wrapper = d.$wrapper;
 
+// 	// ── Attach events after DOM is ready ──────────────────────────
 // 	const wait = setInterval(() => {
-// 		const mainInput = document.getElementById('ws-fi-main');
-// 		const dz        = document.getElementById('ws-dz');
+// 		const mainInput = d_wrapper.find('#ws-fi-main')[0];
+// 		const dz = d_wrapper.find('#ws-dz')[0];
 // 		if (!mainInput || !dz) return;
 // 		clearInterval(wait);
 
-// 		mainInput.addEventListener('change', function() {
+// 		mainInput.addEventListener('change', function () {
 // 			const files = Array.from(this.files || []);
 // 			if (files.length) add_files(files);
-// 			this.value = '';
 // 		});
 
-// 		dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('dragover'); });
+// 		dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
 // 		dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-// 		dz.addEventListener('dragend',   () => dz.classList.remove('dragover'));
+// 		dz.addEventListener('dragend', () => dz.classList.remove('dragover'));
 // 		dz.addEventListener('drop', e => {
 // 			e.preventDefault();
 // 			dz.classList.remove('dragover');
 // 			const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.csv'));
 // 			if (files.length) add_files(files);
-// 			else frappe.show_alert({ message: 'Sirf .csv files allowed hain', indicator: 'red' }, 3);
+// 			else frappe.show_alert({ message: 'Only .csv files are allowed', indicator: 'red' }, 3);
 // 		});
 // 	}, 100);
 
@@ -171,19 +165,19 @@
 // 				sel_files.push(f);
 // 				added++;
 // 			} else {
-// 				frappe.show_alert({ message: `"${f.name}" already added hai`, indicator: 'orange' }, 3);
+// 				frappe.show_alert({ message: `"${f.name}" is already added`, indicator: 'orange' }, 3);
 // 			}
 // 		}
 // 		if (added > 0) render();
 // 	}
 
 // 	function render() {
-// 		const flist = document.getElementById('ws-flist');
-// 		const dz    = document.getElementById('ws-dz');
+// 		const flist = d_wrapper.find('#ws-flist')[0];
+// 		const dz = d_wrapper.find('#ws-dz')[0];
 
 // 		if (!sel_files.length) {
-// 			if (flist) flist.innerHTML  = '';
-// 			if (dz)    dz.style.display = '';
+// 			if (flist) flist.innerHTML = '';
+// 			if (dz) dz.style.display = '';
 // 			return;
 // 		}
 // 		if (dz) dz.style.display = 'none';
@@ -205,9 +199,9 @@
 // 						<span class="ws-file-del" data-i="${i}">×</span>
 // 					</div>
 // 				`).join('') +
-// 				`<div class="ws-add-more" id="ws-add-more">
+// 				`<div class="ws-add-more">
 // 					+ Add More Files
-// 					<input type="file" accept=".csv" multiple id="ws-fi-more">
+// 					<input type="file" accept=".csv" multiple class="ws-fi-more">
 // 				</div>`;
 
 // 			flist.querySelectorAll('.ws-file-del').forEach(btn => {
@@ -217,30 +211,27 @@
 // 				});
 // 			});
 
-// 			const moreInput = document.getElementById('ws-fi-more');
-// 			if (moreInput) {
-// 				moreInput.addEventListener('change', function() {
+// 			flist.querySelectorAll('.ws-fi-more').forEach(inp => {
+// 				inp.addEventListener('change', function () {
 // 					const files = Array.from(this.files || []);
 // 					if (files.length) add_files(files);
-// 					this.value = '';
 // 				});
-// 			}
+// 			});
 // 		}
 // 	}
 
 // 	async function run_import() {
-// 		importing = true; // flag set karo — hide karne par clear nahi hoga
-
-// 		const prog    = document.getElementById('ws-prog');
-// 		const progBar = document.getElementById('ws-prog-bar');
-// 		const progLbl = document.getElementById('ws-prog-lbl');
+// 		const prog = d_wrapper.find('#ws-prog')[0];
+// 		const progBar = d_wrapper.find('#ws-prog-bar')[0];
+// 		const progLbl = d_wrapper.find('#ws-prog-lbl')[0];
 
 // 		if (prog) prog.classList.add('show');
 
-// 		const total   = sel_files.length;
+// 		const total = sel_files.length;
 // 		const success = [];
-// 		const failed  = [];
-// 		const dupes   = [];
+// 		const failed = [];
+// 		const dupes = [];
+// 		const partial = []; // success but with some missing domains
 
 // 		for (let i = 0; i < total; i++) {
 // 			const file = sel_files[i];
@@ -251,22 +242,61 @@
 // 				const csv_content = await read_file(file);
 // 				const r = await new Promise(resolve => {
 // 					frappe.call({
+// 						// ✅ Correct method path
 // 						method: 'workspace_insights.workspace_insights.doctype.purchase_invoice.purchase_invoice.import_workspace_csv_content',
 // 						args: { csv_content },
 // 						callback: resolve,
-// 						error:    resolve
+// 						error: resolve
 // 					});
 // 				});
 
 // 				const msg = r && r.message;
-// 				if (msg && msg.success) {
-// 					success.push({ file: file.name, doc: msg.name, invoice: msg.invoice_number, rows: msg.total_rows });
-// 				} else if (msg && msg.duplicate) {
-// 					dupes.push({ file: file.name, invoice: msg.invoice_number, existing_doc: msg.existing_doc });
+
+// 				if (msg && msg.duplicate) {
+// 					dupes.push({
+// 						file: file.name,
+// 						invoice: msg.invoice_number,
+// 						existing_doc: msg.existing_doc
+// 					});
+// 				} else if (msg && msg.success) {
+// 					if (msg.missing_domains && msg.missing_domains.length) {
+// 						// Partial — some rows imported, some domains were missing
+// 						partial.push({
+// 							file: file.name,
+// 							doc: msg.name,
+// 							invoice: msg.invoice_number,
+// 							rows: msg.total_rows,
+// 							missing_domains: msg.missing_domains
+// 						});
+// 					} else {
+// 						// Full success — all rows imported
+// 						success.push({
+// 							file: file.name,
+// 							doc: msg.name,
+// 							invoice: msg.invoice_number,
+// 							rows: msg.total_rows
+// 						});
+// 					}
 // 				} else {
-// 					failed.push({ file: file.name, error: (msg && msg.error) || 'Unknown error' });
+// 					// ✅ FIX: Build a clear, readable error message
+// 					let err_msg = (msg && msg.error) || 'Unknown error';
+
+// 					// If server returned missing_domains, show them clearly
+// 					if (msg && msg.missing_domains && msg.missing_domains.length) {
+// 						err_msg = `
+// 							${err_msg}<br><br>
+// 							<b>Domains not registered (${msg.missing_domains.length}):</b>
+// 							<ul style="margin:6px 0 0 0; padding-left:18px; color:#b91c1c;">
+// 								${msg.missing_domains.map(d => `<li>${d}</li>`).join('')}
+// 							</ul>
+// 							Please go to <b>Domains</b> list and register the above domains first.
+// 						`;
+// 					}
+
+// 					failed.push({ file: file.name, error: err_msg });
 // 				}
-// 			} catch(e) {
+
+// 			} catch (e) {
 // 				failed.push({ file: file.name, error: String(e) });
 // 			}
 // 		}
@@ -275,80 +305,147 @@
 // 		if (progLbl) progLbl.textContent = 'Done!';
 
 // 		setTimeout(() => {
-// 			importing = false; // flag reset
 // 			d.hide();
-// 			show_results(success, dupes, failed, listview);
+// 			show_results(success, partial, dupes, failed, listview);
 // 		}, 400);
 // 	}
 // }
 
-// // ── Format size ─────────────────────────────────────────────────
+
 // function fmt_size(b) {
-// 	if (b < 1024)         return b + ' B';
-// 	if (b < 1024 * 1024)  return (b / 1024).toFixed(1) + ' KB';
+// 	if (b < 1024) return b + ' B';
+// 	if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
 // 	return (b / (1024 * 1024)).toFixed(1) + ' MB';
 // }
 
-// // ── Show Results ────────────────────────────────────────────────
-// function show_results(success, dupes, failed, listview) {
+
+// function show_results(success, partial, dupes, failed, listview) {
 // 	let html = '<div style="font-size:13px;line-height:1.8;">';
 
+// 	// ── Full success ───────────────────────────────────────────────
 // 	if (success.length) {
-// 		html += `<div style="margin-bottom:12px;"><div style="font-weight:700;color:#15803d;margin-bottom:6px;">✅ ${success.length} file(s) successfully imported:</div>`;
+// 		html += `
+// 			<div style="margin-bottom:12px;">
+// 				<div style="font-weight:700;color:#15803d;margin-bottom:6px;">
+// 					✅ ${success.length} file(s) imported successfully:
+// 				</div>`;
 // 		success.forEach(r => {
-// 			html += `<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
-// 				📄 <b>${r.file}</b><br>
-// 				<span style="color:#6b7280;">Invoice: ${r.invoice} &nbsp;|&nbsp; ${r.rows} rows &nbsp;|&nbsp; Doc: ${r.doc}</span>
-// 			</div>`;
+// 			html += `
+// 				<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
+// 					📄 <b>${r.file}</b><br>
+// 					<span style="color:#6b7280;">
+// 						Invoice: <b>${r.invoice}</b> &nbsp;|&nbsp;
+// 						${r.rows} rows imported &nbsp;|&nbsp;
+// 						Doc: <b>${r.doc}</b>
+// 					</span>
+// 				</div>`;
 // 		});
 // 		html += '</div>';
 // 	}
+
+// 	// ── Partial success (some domains were missing) ────────────────
+// 	if (partial.length) {
+// 		html += `
+// 			<div style="margin-bottom:12px;">
+// 				<div style="font-weight:700;color:#b45309;margin-bottom:6px;">
+// 					⚠️ ${partial.length} file(s) imported with warnings:
+// 				</div>`;
+// 		partial.forEach(r => {
+// 			html += `
+// 				<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
+// 					📄 <b>${r.file}</b><br>
+// 					<span style="color:#6b7280;">
+// 						Invoice: <b>${r.invoice}</b> &nbsp;|&nbsp; ${r.rows} rows imported &nbsp;|&nbsp; Doc: <b>${r.doc}</b>
+// 					</span><br>
+// 					<span style="color:#b45309;font-weight:600;">
+// 						Skipped — domains not registered (${r.missing_domains.length}):
+// 					</span>
+// 					<ul style="margin:4px 0 0 0;padding-left:18px;color:#92400e;">
+// 						${r.missing_domains.map(d => `<li>${d}</li>`).join('')}
+// 					</ul>
+// 					<span style="font-size:11px;color:#6b7280;">
+// 						Register these domains and re-import to include them.
+// 					</span>
+// 				</div>`;
+// 		});
+// 		html += '</div>';
+// 	}
+
+// 	// ── Duplicates ─────────────────────────────────────────────────
 // 	if (dupes.length) {
-// 		html += `<div style="margin-bottom:12px;"><div style="font-weight:700;color:#b45309;margin-bottom:6px;">⚠️ ${dupes.length} file(s) skip (Duplicate):</div>`;
+// 		html += `
+// 			<div style="margin-bottom:12px;">
+// 				<div style="font-weight:700;color:#6b7280;margin-bottom:6px;">
+// 					🔁 ${dupes.length} file(s) skipped (already imported):
+// 				</div>`;
 // 		dupes.forEach(r => {
-// 			html += `<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
-// 				📄 <b>${r.file}</b><br>
-// 				<span style="color:#6b7280;">Invoice <b>${r.invoice}</b> already exist → <b>${r.existing_doc}</b></span>
-// 			</div>`;
+// 			html += `
+// 				<div style="background:#f9fafb;border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
+// 					📄 <b>${r.file}</b><br>
+// 					<span style="color:#6b7280;">
+// 						Invoice <b>${r.invoice}</b> already exists →
+// 						<a href="/app/purchase-invoice/${r.existing_doc}" target="_blank">${r.existing_doc}</a>
+// 					</span>
+// 				</div>`;
 // 		});
 // 		html += '</div>';
 // 	}
+
+// 	// ── Failed ─────────────────────────────────────────────────────
 // 	if (failed.length) {
-// 		html += `<div style="margin-bottom:12px;"><div style="font-weight:700;color:#dc2626;margin-bottom:6px;">❌ ${failed.length} file(s) failed:</div>`;
+// 		html += `
+// 			<div style="margin-bottom:12px;">
+// 				<div style="font-weight:700;color:#dc2626;margin-bottom:6px;">
+// 					❌ ${failed.length} file(s) failed:
+// 				</div>`;
 // 		failed.forEach(r => {
-// 			html += `<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
-// 				📄 <b>${r.file}</b><br><span style="color:#6b7280;">${r.error}</span>
-// 			</div>`;
+// 			html += `
+// 				<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
+// 					📄 <b>${r.file}</b><br>
+// 					<span style="color:#6b7280;">${r.error}</span>
+// 				</div>`;
 // 		});
 // 		html += '</div>';
 // 	}
 
 // 	html += '</div>';
+
+// 	const total_files = success.length + partial.length + dupes.length + failed.length;
+// 	const indicator = success.length || partial.length ? 'green' : (dupes.length ? 'orange' : 'red');
+
 // 	frappe.msgprint({
-// 		title: `Import Results (${success.length + dupes.length + failed.length} files)`,
+// 		title: `Import Results — ${total_files} file(s)`,
 // 		message: html,
-// 		indicator: success.length ? 'green' : (dupes.length ? 'orange' : 'red')
+// 		indicator: indicator
 // 	});
+
 // 	listview.refresh();
 // }
 
-// // ── Read file ───────────────────────────────────────────────────
+
 // function read_file(file) {
 // 	return new Promise((resolve, reject) => {
 // 		const r = new FileReader();
-// 		r.onload  = e => resolve(e.target.result);
+// 		r.onload = e => resolve(e.target.result);
 // 		r.onerror = reject;
 // 		r.readAsText(file, 'utf-8');
 // 	});
 // }
 
+
+
 frappe.listview_settings['Purchase Invoice'] = {
-	onload: function(listview) {
-		listview.page.add_inner_button(__('Import'), function() {
-			show_import_dialog(listview);
-		});
+	onload: function (listview) {
+		// Use setTimeout so this button renders AFTER Frappe's standard buttons
+		// (List View, refresh, ...) giving it the correct position
+		setTimeout(() => {
+			listview.page.add_button(__('📂 Import'), function () {
+				show_import_dialog(listview);
+			}, { btn_class: 'btn-default' });
+		}, 300);
 	}
 };
+
 
 function show_import_dialog(listview) {
 
@@ -374,14 +471,12 @@ function show_import_dialog(listview) {
 			display: inline-block; position: relative;
 			border: 1.5px solid #1a56db; border-radius: 6px;
 			padding: 9px 24px; font-size: 13px; font-weight: 600;
-			color: #1a56db; background: #fff; cursor: pointer;
-			transition: all .15s;
+			color: #1a56db; background: #fff; cursor: pointer; transition: all .15s;
 		}
 		.ws-choose-label:hover { background: #1a56db; color: #fff; }
 		.ws-choose-label input[type=file] {
 			position: absolute; top: 0; left: 0;
-			width: 100%; height: 100%;
-			opacity: 0; cursor: pointer;
+			width: 100%; height: 100%; opacity: 0; cursor: pointer;
 		}
 		.ws-files-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
 		.ws-file-item {
@@ -401,14 +496,12 @@ function show_import_dialog(listview) {
 		.ws-add-more {
 			border: 1.5px dashed #93c5fd; border-radius: 8px; padding: 10px;
 			text-align: center; color: #1a56db; font-size: 13px; font-weight: 600;
-			background: #eff6ff; transition: all .15s; cursor: pointer;
-			position: relative;
+			background: #eff6ff; transition: all .15s; cursor: pointer; position: relative;
 		}
 		.ws-add-more:hover { background: #dbeafe; }
 		.ws-add-more input[type=file] {
 			position: absolute; top: 0; left: 0;
-			width: 100%; height: 100%;
-			opacity: 0; cursor: pointer;
+			width: 100%; height: 100%; opacity: 0; cursor: pointer;
 		}
 		.ws-prog-wrap { display: none; margin-bottom: 12px; }
 		.ws-prog-wrap.show { display: block; }
@@ -423,8 +516,15 @@ function show_import_dialog(listview) {
 		document.head.appendChild(st);
 	}
 
+	// Accepted file types
+	const ACCEPTED_EXT = ['.csv', '.xlsx', '.xls'];
+
+	function is_valid_file(f) {
+		return ACCEPTED_EXT.some(ext => f.name.toLowerCase().endsWith(ext));
+	}
+
 	let sel_files = [];
-	let d_wrapper  = null; // dialog wrapper reference
+	let d_wrapper = null;
 
 	const d = new frappe.ui.Dialog({
 		title: 'Import Workspace Invoice',
@@ -441,14 +541,14 @@ function show_import_dialog(listview) {
 							<line x1="12" y1="3" x2="12" y2="15"/>
 						</svg>
 					</div>
-					<div class="ws-drop-title">Upload CSV File(s)</div>
+					<div class="ws-drop-title">Upload Invoice File(s)</div>
 					<div class="ws-drop-sub">
 						Drag &amp; drop files here, or click below<br>
-						<small style="color:#9ca3af">Ek ya ek se zyada .csv files select kar sakte hain</small>
+						<small style="color:#9ca3af">Supported: .csv and .xlsx files</small>
 					</div>
 					<label class="ws-choose-label">
 						📂 Choose Files
-						<input type="file" accept=".csv" multiple id="ws-fi-main">
+						<input type="file" accept=".csv,.xlsx,.xls" multiple id="ws-fi-main">
 					</label>
 				</div>
 				<div class="ws-files-list" id="ws-flist"></div>
@@ -457,42 +557,44 @@ function show_import_dialog(listview) {
 					<div class="ws-prog-bg"><div class="ws-prog-bar" id="ws-prog-bar"></div></div>
 				</div>
 				<div class="ws-note">
-					<b>Note:</b> Sirf Google Workspace invoice CSV supported hai &nbsp;·&nbsp;
-					Duplicate invoice automatically skip ho jayegi
+					<b>Supported formats:</b> Google Workspace invoice CSV or Excel (.xlsx) &nbsp;·&nbsp;
+					Duplicate invoices are automatically skipped
 				</div>
 			</div>
 			`
 		}],
 		primary_action_label: 'Import',
-		primary_action: function() {
+		primary_action: function () {
 			if (!sel_files.length) {
-				frappe.show_alert({ message: 'Pehle CSV file(s) select karo!', indicator: 'orange' }, 4);
+				frappe.show_alert({ message: 'Please select a file first!', indicator: 'orange' }, 4);
 				return;
 			}
 			run_import();
 		},
 		secondary_action_label: 'Cancel',
-		secondary_action: function() { d.hide(); }
+		secondary_action: function () { d.hide(); }
 	});
 
-	d.onhide = function() { sel_files = []; };
-
+	d.onhide = function () {
+		sel_files = [];
+		// Clear any pending timer so it doesn't conflict with next dialog open
+		if (d._attach_timer) {
+			clearTimeout(d._attach_timer);
+			d._attach_timer = null;
+		}
+	};
 	d.show();
-
-	// ── d.$wrapper save karo — render mein use hoga ──
 	d_wrapper = d.$wrapper;
 
-	// ── DOM ready hone par events attach karo ──
-	const wait = setInterval(() => {
+	// Use setTimeout (not setInterval) — runs once, no stale timer risk.
+	// Frappe renders dialog HTML synchronously so 150ms is always enough.
+	d._attach_timer = setTimeout(() => {
 		const mainInput = d_wrapper.find('#ws-fi-main')[0];
 		const dz        = d_wrapper.find('#ws-dz')[0];
 		if (!mainInput || !dz) return;
-		clearInterval(wait);
 
-		// ✅ FIX 1: this.value = '' hataया — change event hamesha fire karega
-		mainInput.addEventListener('change', function() {
-			const files = Array.from(this.files || []);
-			if (files.length) add_files(files);
+		mainInput.addEventListener('change', function () {
+			add_files(Array.from(this.files || []));
 		});
 
 		dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('dragover'); });
@@ -501,36 +603,38 @@ function show_import_dialog(listview) {
 		dz.addEventListener('drop', e => {
 			e.preventDefault();
 			dz.classList.remove('dragover');
-			const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.csv'));
+			const files = Array.from(e.dataTransfer.files).filter(is_valid_file);
 			if (files.length) add_files(files);
-			else frappe.show_alert({ message: 'Sirf .csv files allowed hain', indicator: 'red' }, 3);
+			else frappe.show_alert({ message: 'Only .csv or .xlsx files are allowed', indicator: 'red' }, 3);
 		});
-	}, 100);
+	}, 150);
 
 	function add_files(new_files) {
 		let added = 0;
 		for (const f of new_files) {
+			if (!is_valid_file(f)) {
+				frappe.show_alert({ message: `"${f.name}" is not a supported file type`, indicator: 'orange' }, 3);
+				continue;
+			}
 			if (!sel_files.find(x => x.name === f.name)) {
 				sel_files.push(f);
 				added++;
 			} else {
-				frappe.show_alert({ message: `"${f.name}" already added hai`, indicator: 'orange' }, 3);
+				frappe.show_alert({ message: `"${f.name}" is already added`, indicator: 'orange' }, 3);
 			}
 		}
 		if (added > 0) render();
 	}
 
 	function render() {
-		// ✅ FIX 2: d.$wrapper.find() use karo — getElementById nahi
 		const flist = d_wrapper.find('#ws-flist')[0];
 		const dz    = d_wrapper.find('#ws-dz')[0];
 
 		if (!sel_files.length) {
-			if (flist) flist.innerHTML  = '';
+			if (flist) flist.innerHTML = '';
 			if (dz)    dz.style.display = '';
 			return;
 		}
-
 		if (dz) dz.style.display = 'none';
 
 		if (flist) {
@@ -552,22 +656,18 @@ function show_import_dialog(listview) {
 				`).join('') +
 				`<div class="ws-add-more">
 					+ Add More Files
-					<input type="file" accept=".csv" multiple class="ws-fi-more">
+					<input type="file" accept=".csv,.xlsx,.xls" multiple class="ws-fi-more">
 				</div>`;
 
-			// Delete buttons
 			flist.querySelectorAll('.ws-file-del').forEach(btn => {
 				btn.addEventListener('click', () => {
 					sel_files.splice(parseInt(btn.dataset.i), 1);
 					render();
 				});
 			});
-
-			// ✅ FIX 3: Add More input — bhi value reset nahi
 			flist.querySelectorAll('.ws-fi-more').forEach(inp => {
-				inp.addEventListener('change', function() {
-					const files = Array.from(this.files || []);
-					if (files.length) add_files(files);
+				inp.addEventListener('change', function () {
+					add_files(Array.from(this.files || []));
 				});
 			});
 		}
@@ -577,107 +677,196 @@ function show_import_dialog(listview) {
 		const prog    = d_wrapper.find('#ws-prog')[0];
 		const progBar = d_wrapper.find('#ws-prog-bar')[0];
 		const progLbl = d_wrapper.find('#ws-prog-lbl')[0];
-
 		if (prog) prog.classList.add('show');
 
 		const total   = sel_files.length;
 		const success = [];
 		const failed  = [];
 		const dupes   = [];
+		const partial = [];
 
 		for (let i = 0; i < total; i++) {
 			const file = sel_files[i];
 			if (progLbl) progLbl.textContent = `Processing ${i + 1} of ${total}: ${file.name}`;
-			if (progBar) progBar.style.width = `${Math.round((i / total) * 85)}%`;
+			if (progBar) progBar.style.width  = `${Math.round((i / total) * 85)}%`;
 
 			try {
-				const csv_content = await read_file(file);
+				// ── Read file based on type ───────────────────────
+				const { content, file_type } = await read_file_content(file);
+
 				const r = await new Promise(resolve => {
 					frappe.call({
 						method: 'workspace_insights.workspace_insights.doctype.purchase_invoice.purchase_invoice.import_workspace_csv_content',
-						args: { csv_content },
+						args:   { csv_content: content, file_type },
 						callback: resolve,
 						error:    resolve
 					});
 				});
 
 				const msg = r && r.message;
-				if (msg && msg.success) {
-					success.push({ file: file.name, doc: msg.name, invoice: msg.invoice_number, rows: msg.total_rows });
-				} else if (msg && msg.duplicate) {
+
+				if (msg && msg.duplicate) {
 					dupes.push({ file: file.name, invoice: msg.invoice_number, existing_doc: msg.existing_doc });
+
+				} else if (msg && msg.success) {
+					const has_missing = (msg.missing_domains       && msg.missing_domains.length)
+					                 || (msg.missing_subscriptions && msg.missing_subscriptions.length);
+					if (has_missing) {
+						partial.push({
+							file:                  file.name,
+							doc:                   msg.name,
+							invoice:               msg.invoice_number,
+							rows:                  msg.total_rows,
+							missing_domains:       msg.missing_domains       || [],
+							missing_subscriptions: msg.missing_subscriptions || []
+						});
+					} else {
+						success.push({ file: file.name, doc: msg.name, invoice: msg.invoice_number, rows: msg.total_rows });
+					}
 				} else {
-					failed.push({ file: file.name, error: (msg && msg.error) || 'Unknown error' });
+					// ── Build readable error ──────────────────────
+					let err = (msg && msg.error) || 'Unknown error';
+					if (msg && msg.missing_domains && msg.missing_domains.length) {
+						err += `<br><br>
+							<b>Domains not registered (${msg.missing_domains.length}) — please create these in the Domains list first:</b>
+							<ul style="margin:6px 0 0 0;padding-left:18px;color:#b91c1c;">
+								${msg.missing_domains.map(d => `<li>${d}</li>`).join('')}
+							</ul>`;
+					}
+					failed.push({ file: file.name, error: err });
 				}
-			} catch(e) {
+
+			} catch (e) {
 				failed.push({ file: file.name, error: String(e) });
 			}
 		}
 
-		if (progBar) progBar.style.width = '100%';
-		if (progLbl) progLbl.textContent = 'Done!';
+		if (progBar) progBar.style.width  = '100%';
+		if (progLbl) progLbl.textContent   = 'Done!';
 
 		setTimeout(() => {
 			d.hide();
-			show_results(success, dupes, failed, listview);
+			show_results(success, partial, dupes, failed, listview);
 		}, 400);
 	}
 }
 
+
+// ── Read file as text (CSV) or base64 (XLSX) ─────────────────────
+function read_file_content(file) {
+	const is_xlsx = file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls');
+
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+
+		if (is_xlsx) {
+			// Read xlsx as ArrayBuffer → encode to base64 → Python uses openpyxl
+			reader.onload = e => {
+				const bytes  = new Uint8Array(e.target.result);
+				let   binary = '';
+				for (let i = 0; i < bytes.byteLength; i++) {
+					binary += String.fromCharCode(bytes[i]);
+				}
+				resolve({ content: btoa(binary), file_type: 'xlsx' });
+			};
+			reader.onerror = reject;
+			reader.readAsArrayBuffer(file);
+		} else {
+			// Read CSV as plain text
+			reader.onload  = e => resolve({ content: e.target.result, file_type: 'csv' });
+			reader.onerror = reject;
+			reader.readAsText(file, 'utf-8');
+		}
+	});
+}
+
+
 function fmt_size(b) {
-	if (b < 1024)        return b + ' B';
-	if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+	if (b < 1024)         return b + ' B';
+	if (b < 1024 * 1024)  return (b / 1024).toFixed(1) + ' KB';
 	return (b / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
-function show_results(success, dupes, failed, listview) {
+
+function show_results(success, partial, dupes, failed, listview) {
 	let html = '<div style="font-size:13px;line-height:1.8;">';
+
 	if (success.length) {
-		html += `<div style="margin-bottom:12px;"><div style="font-weight:700;color:#15803d;margin-bottom:6px;">✅ ${success.length} file(s) successfully imported:</div>`;
+		html += `<div style="margin-bottom:12px;">
+			<div style="font-weight:700;color:#15803d;margin-bottom:6px;">✅ ${success.length} file(s) imported successfully:</div>`;
 		success.forEach(r => {
 			html += `<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
 				📄 <b>${r.file}</b><br>
-				<span style="color:#6b7280;">Invoice: ${r.invoice} &nbsp;|&nbsp; ${r.rows} rows &nbsp;|&nbsp; Doc: ${r.doc}</span>
+				<span style="color:#6b7280;">Invoice: <b>${r.invoice}</b> &nbsp;|&nbsp; ${r.rows} rows &nbsp;|&nbsp; Doc: <b>${r.doc}</b></span>
 			</div>`;
 		});
 		html += '</div>';
 	}
-	if (dupes.length) {
-		html += `<div style="margin-bottom:12px;"><div style="font-weight:700;color:#b45309;margin-bottom:6px;">⚠️ ${dupes.length} file(s) skip (Duplicate):</div>`;
-		dupes.forEach(r => {
+
+	if (partial.length) {
+		html += `<div style="margin-bottom:12px;">
+			<div style="font-weight:700;color:#b45309;margin-bottom:6px;">⚠️ ${partial.length} file(s) imported with warnings:</div>`;
+		partial.forEach(r => {
 			html += `<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
 				📄 <b>${r.file}</b><br>
-				<span style="color:#6b7280;">Invoice <b>${r.invoice}</b> already exist → <b>${r.existing_doc}</b></span>
+				<span style="color:#6b7280;">Invoice: <b>${r.invoice}</b> &nbsp;|&nbsp; ${r.rows} rows imported &nbsp;|&nbsp; Doc: <b>${r.doc}</b></span>`;
+
+			if (r.missing_domains.length) {
+				html += `<br><b style="color:#b45309;">Skipped — domains not registered (${r.missing_domains.length}):</b>
+				<ul style="margin:4px 0 0 0;padding-left:18px;color:#92400e;">
+					${r.missing_domains.map(d => `<li>${d} — <a href="/app/domains/new-domains-1" target="_blank">Create domain</a></li>`).join('')}
+				</ul>`;
+			}
+
+			if (r.missing_subscriptions.length) {
+				html += `<br><b style="color:#b45309;">Skipped — subscriptions not in Subscription Plan (${r.missing_subscriptions.length}):</b>
+				<ul style="margin:4px 0 0 0;padding-left:18px;color:#92400e;">
+					${r.missing_subscriptions.map(s => `<li>${s} — <a href="/app/subscription-plan/new-subscription-plan-1" target="_blank">Create plan</a></li>`).join('')}
+				</ul>`;
+			}
+
+			html += `</div>`;
+		});
+		html += '</div>';
+	}
+
+	if (dupes.length) {
+		html += `<div style="margin-bottom:12px;">
+			<div style="font-weight:700;color:#6b7280;margin-bottom:6px;">🔁 ${dupes.length} file(s) skipped (already imported):</div>`;
+		dupes.forEach(r => {
+			html += `<div style="background:#f9fafb;border:1px solid #d1d5db;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
+				📄 <b>${r.file}</b><br>
+				<span style="color:#6b7280;">Invoice <b>${r.invoice}</b> already exists →
+				<a href="/app/purchase-invoice/${r.existing_doc}" target="_blank">${r.existing_doc}</a></span>
 			</div>`;
 		});
 		html += '</div>';
 	}
+
 	if (failed.length) {
-		html += `<div style="margin-bottom:12px;"><div style="font-weight:700;color:#dc2626;margin-bottom:6px;">❌ ${failed.length} file(s) failed:</div>`;
+		html += `<div style="margin-bottom:12px;">
+			<div style="font-weight:700;color:#dc2626;margin-bottom:6px;">❌ ${failed.length} file(s) failed:</div>`;
 		failed.forEach(r => {
 			html += `<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
-				📄 <b>${r.file}</b><br><span style="color:#6b7280;">${r.error}</span>
+				📄 <b>${r.file}</b><br>
+				<span style="color:#6b7280;">${r.error}</span>
 			</div>`;
 		});
 		html += '</div>';
 	}
+
 	html += '</div>';
+
 	frappe.msgprint({
-		title: `Import Results (${success.length + dupes.length + failed.length} files)`,
-		message: html,
-		indicator: success.length ? 'green' : (dupes.length ? 'orange' : 'red')
+		title:     `Import Results — ${success.length + partial.length + dupes.length + failed.length} file(s)`,
+		message:   html,
+		indicator: success.length || partial.length ? 'green' : (dupes.length ? 'orange' : 'red')
 	});
+
 	listview.refresh();
 }
 
-function read_file(file) {
-	return new Promise((resolve, reject) => {
-		const r = new FileReader();
-		r.onload  = e => resolve(e.target.result);
-		r.onerror = reject;
-		r.readAsText(file, 'utf-8');
-	});
-}
+
 
 
 

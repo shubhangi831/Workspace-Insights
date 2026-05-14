@@ -1,8 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
- "allow_rename": 1,
- "autoname": "format:SI-{invoice_number}",
+ "autoname": "format:SI-{####}",
  "creation": "2026-05-07 13:10:48.362429",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -22,13 +21,15 @@
    "fieldname": "bill_to",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Bill to"
+   "label": "Bill to",
+   "reqd": 1
   },
   {
    "fieldname": "invoice_number",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Invoice number"
+   "label": "Invoice number",
+   "reqd": 1
   },
   {
    "fieldname": "invoice_date",
@@ -46,36 +47,37 @@
    "fieldname": "billing_id",
    "fieldtype": "Data",
    "hidden": 1,
-   "in_list_view": 1,
    "label": "Billing ID"
   },
   {
+   "default": "INR",
    "fieldname": "currency",
    "fieldtype": "Select",
    "label": "Currency",
-   "options": "INR"
+   "options": "INR\nUSD\nEUR"
   },
   {
    "fieldname": "invoice_amount",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Invoice amount"
+   "label": "Invoice amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "invoice_attachment",
+   "fieldtype": "Attach",
+   "label": "Invoice Attachment"
   },
   {
    "fieldname": "domain_details",
    "fieldtype": "Table",
    "label": "Domain Details",
    "options": "Sale Invoice Items"
-  },
-  {
-   "fieldname": "invoice_attachment",
-   "fieldtype": "Attach",
-   "label": "Invoice Attachment"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-08 18:20:05.556991",
+ "modified": "2026-05-13 14:36:35.732383",
  "modified_by": "Administrator",
  "module": "Workspace Insights",
  "name": "Sale Invoice",
@@ -95,7 +97,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "invoice_date",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1,

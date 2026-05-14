@@ -20,18 +20,23 @@
    "fieldname": "bill_to",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Bill to"
+   "label": "Bill to",
+   "reqd": 1
   },
   {
    "fieldname": "invoice_number",
    "fieldtype": "Data",
-   "label": "Invoice number"
+   "in_list_view": 1,
+   "label": "Invoice number",
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "invoice_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Invoice date"
+   "label": "Invoice date",
+   "reqd": 1
   },
   {
    "fieldname": "due_date",
@@ -49,13 +54,15 @@
    "fieldname": "currency",
    "fieldtype": "Select",
    "label": "Currency",
-   "options": "INR"
+   "options": "INR\nUSD\nEUR",
+   "default": "INR"
   },
   {
    "fieldname": "invoice_amount",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Invoice amount"
+   "label": "Invoice amount",
+   "options": "currency"
   },
   {
    "fieldname": "domain_details",
@@ -66,7 +73,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-08 13:33:06.585191",
+ "modified": "2026-05-12 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Workspace Insights",
  "name": "Purchase Invoice",
@@ -86,7 +93,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "invoice_date",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1,

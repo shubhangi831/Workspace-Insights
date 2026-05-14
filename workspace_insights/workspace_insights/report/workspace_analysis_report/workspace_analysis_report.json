@@ -15,7 +15,7 @@
  "name": "Workspace Analysis Report",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Workspace Analysis",
+ "ref_doctype": "Purchase Invoice",
  "report_name": "Workspace Analysis Report",
  "report_type": "Script Report",
  "roles": [],
