@@ -1,7 +1,8 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "format:SI-{####}",
+ "allow_rename": 1,
+ "autoname": "format:SI-{invoice_number}",
  "creation": "2026-05-07 13:10:48.362429",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -14,22 +15,25 @@
   "currency",
   "invoice_amount",
   "invoice_attachment",
-  "domain_details"
+  "domain_details",
+  "gst_section",
+  "gst_rate",
+  "subtotal",
+  "gst_amount",
+  "grand_total"
  ],
  "fields": [
   {
    "fieldname": "bill_to",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Bill to",
-   "reqd": 1
+   "label": "Bill to"
   },
   {
    "fieldname": "invoice_number",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Invoice number",
-   "reqd": 1
+   "label": "Invoice number"
   },
   {
    "fieldname": "invoice_date",
@@ -47,21 +51,26 @@
    "fieldname": "billing_id",
    "fieldtype": "Data",
    "hidden": 1,
+   "in_list_view": 1,
    "label": "Billing ID"
   },
   {
-   "default": "INR",
    "fieldname": "currency",
    "fieldtype": "Select",
    "label": "Currency",
-   "options": "INR\nUSD\nEUR"
+   "options": "INR"
   },
   {
    "fieldname": "invoice_amount",
-   "fieldtype": "Currency",
+   "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Invoice amount",
-   "options": "currency"
+   "label": "Invoice amount"
+  },
+  {
+   "fieldname": "domain_details",
+   "fieldtype": "Table",
+   "label": "Domain Details",
+   "options": "Sale Invoice Items"
   },
   {
    "fieldname": "invoice_attachment",
@@ -69,15 +78,41 @@
    "label": "Invoice Attachment"
   },
   {
-   "fieldname": "domain_details",
-   "fieldtype": "Table",
-   "label": "Domain Details",
-   "options": "Sale Invoice Items"
+   "fieldname": "gst_section",
+   "fieldtype": "Section Break",
+   "label": "Tax & Total"
+  },
+  {
+   "fieldname": "gst_rate",
+   "fieldtype": "Float",
+   "label": "GST Rate (%)",
+   "default": "18",
+   "description": "GST percentage to apply on subtotal"
+  },
+  {
+   "fieldname": "subtotal",
+   "fieldtype": "Currency",
+   "label": "Subtotal",
+   "read_only": 1,
+   "in_list_view": 0
+  },
+  {
+   "fieldname": "gst_amount",
+   "fieldtype": "Currency",
+   "label": "GST Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total (with GST)",
+   "read_only": 1,
+   "bold": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-13 14:36:35.732383",
+ "modified": "2026-05-08 18:20:05.556991",
  "modified_by": "Administrator",
  "module": "Workspace Insights",
  "name": "Sale Invoice",
@@ -97,7 +132,7 @@
    "write": 1
   }
  ],
- "sort_field": "invoice_date",
+ "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1,
