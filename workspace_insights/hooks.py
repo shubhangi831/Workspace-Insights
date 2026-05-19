@@ -148,7 +148,13 @@ app_license = "mit"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
+    # Runs once daily — checks subscriptions expiring in 10 days,
+    # sends bell notification + summary email to all System Manager users
+    "daily": [
+        "workspace_insights.workspace_insights.utils.renewal_notifications.check_renewals"
+    ],
+
 # 	"all": [
 # 		"workspace_insights.tasks.all"
 # 	],
@@ -164,7 +170,7 @@ app_license = "mit"
 # 	"monthly": [
 # 		"workspace_insights.tasks.monthly"
 # 	],
-# }
+}
 
 # Testing
 # -------

@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:PI-{invoice_number}",
+ "creation": "2026-05-04 17:01:10.470791",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bill_to",
+  "invoice_number",
+  "invoice_date",
+  "due_date",
+  "billing_id",
+  "currency",
+  "invoice_amount",
+  "attachment",
+  "domain_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "bill_to",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bill to",
+   "reqd": 1
+  },
+  {
+   "fieldname": "invoice_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Invoice number",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Invoice date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Due date"
+  },
+  {
+   "fieldname": "billing_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Billing ID"
+  },
+  {
+   "default": "INR",
+   "fieldname": "currency",
+   "fieldtype": "Select",
+   "label": "Currency",
+   "options": "INR\nUSD\nEUR"
+  },
+  {
+   "fieldname": "invoice_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Invoice amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "domain_details",
+   "fieldtype": "Table",
+   "label": "Domain Details",
+   "options": "Purchase Invoice Items"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-19 16:09:57.474420",
+ "modified_by": "Administrator",
+ "module": "Workspace Insights",
+ "name": "Purchase Invoice",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "invoice_date",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_views": 1
+}
