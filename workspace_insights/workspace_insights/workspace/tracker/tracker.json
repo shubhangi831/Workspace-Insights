@@ -1,0 +1,114 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"CnkAE2mUVN\",\"type\":\"card\",\"data\":{\"card_name\":\"Workspace Analytics\",\"col\":4}},{\"id\":\"d95gxmvQ57\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Report</b></span>\",\"col\":12}},{\"id\":\"jhuEoi25j5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Workspace Analysis Report\",\"col\":3}},{\"id\":\"3M0UHunLwB\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Dashboard</span>\",\"col\":12}},{\"id\":\"HNSvXrwuiB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Workspace Dashboard\",\"col\":3}}]",
+ "creation": "2026-05-09 12:55:19.309240",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "accounting",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Tracker",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Workspace Analytics",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Domain",
+   "link_count": 0,
+   "link_to": "Domains",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Subscription",
+   "link_count": 0,
+   "link_to": "Subscription Plan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer Detail",
+   "link_count": 0,
+   "link_to": "Customer Details",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Invoice",
+   "link_count": 0,
+   "link_to": "Purchase Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sale Invoice",
+   "link_count": 0,
+   "link_to": "Sale Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "DocType",
+   "link_count": 0,
+   "link_to": "DocType",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-05-19 16:43:06.766167",
+ "modified_by": "Administrator",
+ "module": "Workspace Insights",
+ "name": "Tracker",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 28.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Workspace Dashboard",
+   "type": "URL",
+   "url": "/app/workspace-dashboard"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Workspace Analysis Report",
+   "type": "URL",
+   "url": "/app/query-report/Workspace%20Analysis%20Report"
+  }
+ ],
+ "title": "Tracker"
+}

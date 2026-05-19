@@ -13,6 +13,7 @@
   "billing_id",
   "currency",
   "invoice_amount",
+  "attachment",
   "domain_details"
  ],
  "fields": [
@@ -51,11 +52,11 @@
    "label": "Billing ID"
   },
   {
+   "default": "INR",
    "fieldname": "currency",
    "fieldtype": "Select",
    "label": "Currency",
-   "options": "INR\nUSD\nEUR",
-   "default": "INR"
+   "options": "INR\nUSD\nEUR"
   },
   {
    "fieldname": "invoice_amount",
@@ -69,11 +70,16 @@
    "fieldtype": "Table",
    "label": "Domain Details",
    "options": "Purchase Invoice Items"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Attach",
+   "label": "Attachment"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-12 00:00:00.000000",
+ "modified": "2026-05-19 16:09:57.474420",
  "modified_by": "Administrator",
  "module": "Workspace Insights",
  "name": "Purchase Invoice",
