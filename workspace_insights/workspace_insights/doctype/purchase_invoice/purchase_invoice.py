@@ -1,5 +1,6 @@
-# Copyright (c) 2026, sk and contributors
-# For license information, please see license.txt
+# # Copyright (c) 2026, sk and contributors
+# # For license information, please see license.txt
+
 
 import frappe
 import csv
@@ -16,11 +17,6 @@ class PurchaseInvoice(Document):
 # ── xlsx → CSV converter ──
 
 def xlsx_to_csv(b64_content):
-    """
-    Decode base64-encoded xlsx file and convert its first sheet to a CSV string.
-    Uses openpyxl (bundled with Frappe/Python).
-    Proper CSV quoting is applied so cells with commas don't break parsing.
-    """
     try:
         import openpyxl
     except ImportError:
@@ -41,21 +37,8 @@ def xlsx_to_csv(b64_content):
 # ── Main import method ──
 
 @frappe.whitelist()
-def import_workspace_csv_content(csv_content='', file_type='csv'):
-    """
-    Parse a Google Workspace invoice file (CSV or XLSX) and create a Purchase Invoice.
-
-    Parameters:
-      csv_content — plain CSV text (for csv) OR base64-encoded xlsx bytes (for xlsx)
-      file_type   — 'csv' | 'xlsx'
-
-    Key behaviours:
-    - Duplicate invoice → stopped immediately, existing doc returned.
-    - Unregistered domains → skipped (not blocked), listed in response.
-    - New Subscription Plan records → auto-created on first import.
-    """
+def import_workspace_csv_content(csv_content='', file_type='csv', filename=''):
     try:
-        # ── Convert xlsx → csv string if needed ──────────────────
         if file_type == 'xlsx':
             try:
                 csv_content = xlsx_to_csv(csv_content)
@@ -65,14 +48,12 @@ def import_workspace_csv_content(csv_content='', file_type='csv'):
                     'error':   f"Could not read Excel file: {str(e)}"
                 }
 
-        # ── Strip BOM ─────────────────────────────────────────────
         if csv_content.startswith('\ufeff'):
             csv_content = csv_content[1:]
 
         lines = csv_content.replace('\r', '').split('\n')
         lines = [l.strip() for l in lines]
 
-        # ── Parse invoice header ──────────────────────────────────
         header         = {}
         data_start_idx = -1
 
@@ -111,7 +92,6 @@ def import_workspace_csv_content(csv_content='', file_type='csv'):
                 'error':   'Invalid file — "Domain name" header row not found.'
             }
 
-        # ── Duplicate check ───────────────────────────────────────
         existing = frappe.db.get_value(
             'Purchase Invoice',
             {'invoice_number': header['invoice_number']},
@@ -126,16 +106,14 @@ def import_workspace_csv_content(csv_content='', file_type='csv'):
                 'error':          f"Invoice {header['invoice_number']} already imported as {existing}."
             }
 
-        # ── Build normalized subscription plan lookup ─────────────
-        # Use unicodedata NFKC normalization — converts ALL Unicode
-        # whitespace variants (\xa0, \u2009, \u00a0, etc.) to regular
-        # space. This is the definitive fix for Google CSV's non-breaking
-        # spaces inside brackets like "(100\xa0GB)".
-
         import unicodedata
 
         def norm(s):
+            import re
             s = unicodedata.normalize('NFKC', s or '')
+            s = s.replace('-', ' ')
+            s = re.sub(r'(\d)\s+([A-Za-z])', r'\1\2', s)
+            s = re.sub(r'([A-Za-z])\s+(\d)', r'\1\2', s)
             return ' '.join(s.split()).lower()
 
         all_plans   = frappe.get_all('Subscription Plan', fields=['name', 'subscription'])
@@ -146,7 +124,6 @@ def import_workspace_csv_content(csv_content='', file_type='csv'):
             if p.name:
                 plan_lookup[norm(p.name)] = p.name
 
-        # ── First pass — scan ALL rows ────────────────────────────
         missing_domains       = []
         missing_subscriptions = []
         valid_rows            = []
@@ -162,20 +139,17 @@ def import_workspace_csv_content(csv_content='', file_type='csv'):
             if not domain or '.' not in domain:
                 continue
 
-            # Normalize subscription text from CSV
             raw_sub           = cols[1].strip() if len(cols) > 1 else ''
             subscription_text = unicodedata.normalize('NFKC', raw_sub)
             subscription_text = ' '.join(subscription_text.split())
             if not subscription_text:
                 continue
 
-            # ── Domain check ──────────────────────────────────────
             if not frappe.db.exists('Domains', domain):
                 if domain not in missing_domains:
                     missing_domains.append(domain)
                 continue
 
-            # ── Subscription check ────────────────────────────────
             plan_doc_name = plan_lookup.get(norm(subscription_text))
 
             if not plan_doc_name:
@@ -198,7 +172,6 @@ def import_workspace_csv_content(csv_content='', file_type='csv'):
                 'sku_id':       cols[10].strip()   if len(cols) > 10 else '',
             })
 
-        # ── Nothing to import ─────────────────────────────────────
         if not valid_rows:
             msg = "Nothing imported."
             if missing_domains:
@@ -212,7 +185,6 @@ def import_workspace_csv_content(csv_content='', file_type='csv'):
                 'error':                  msg
             }
 
-        # ── Create Purchase Invoice ───────────────────────────────
         doc = frappe.get_doc({
             'doctype':        'Purchase Invoice',
             'bill_to':        header.get('bill_to', ''),
@@ -226,6 +198,24 @@ def import_workspace_csv_content(csv_content='', file_type='csv'):
         })
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
+
+        try:
+            from frappe.utils.file_manager import save_file as _save_file
+            _raw     = csv_content if file_type == 'csv' else base64.b64decode(csv_content)
+            _fname   = filename or f"{header.get('invoice_number', doc.name)}.{file_type}"
+            _content = _raw.encode('utf-8') if isinstance(_raw, str) else _raw
+            _fobj    = _save_file(
+                fname      = _fname,
+                content    = _content,
+                dt         = 'Purchase Invoice',
+                dn         = doc.name,
+                df         = 'attachment',
+                is_private = 1
+            )
+            frappe.db.set_value('Purchase Invoice', doc.name, 'attachment', _fobj.file_url)
+            frappe.db.commit()
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), 'Purchase Invoice Attachment Error')
 
         return {
             'success':                True,
@@ -243,7 +233,140 @@ def import_workspace_csv_content(csv_content='', file_type='csv'):
         return {'success': False, 'error': str(e)}
 
 
-# ── Helpers ──
+# ── Update existing Purchase Invoice with skipped rows ────────────
+
+@frappe.whitelist()
+def update_purchase_invoice(doc_name, csv_content='', file_type='csv'):
+    try:
+        import unicodedata, re
+
+        if file_type == 'xlsx':
+            try:
+                csv_content = xlsx_to_csv(csv_content)
+            except Exception as e:
+                return {'success': False, 'error': f"Could not read Excel file: {str(e)}"}
+
+        if csv_content.startswith('\ufeff'):
+            csv_content = csv_content[1:]
+
+        lines = csv_content.replace('\r', '').split('\n')
+        lines = [l.strip() for l in lines]
+
+        doc = frappe.get_doc('Purchase Invoice', doc_name)
+
+        def norm(s):
+            s = unicodedata.normalize('NFKC', s or '')
+            s = s.replace('-', ' ')
+            s = re.sub(r'(\d)\s+([A-Za-z])', r'\1\2', s)
+            s = re.sub(r'([A-Za-z])\s+(\d)', r'\1\2', s)
+            return ' '.join(s.split()).lower()
+
+        existing_combos = {
+            (norm(str(row.domain or '')), norm(str(row.subscription or '')))
+            for row in (doc.domain_details or [])
+        }
+
+        data_start_idx   = -1
+        invoice_date_str = str(doc.invoice_date or '')
+
+        for i, line in enumerate(lines):
+            if not line:
+                continue
+            cols = parse_line(line)
+            if cols and cols[0].strip() == 'Domain name':
+                data_start_idx = i + 1
+                break
+
+        if data_start_idx < 0:
+            return {'success': False, 'error': 'Invalid file — "Domain name" header not found.'}
+
+        all_plans   = frappe.get_all('Subscription Plan', fields=['name', 'subscription'])
+        plan_lookup = {}
+        for p in all_plans:
+            if p.subscription: plan_lookup[norm(p.subscription)] = p.name
+            if p.name:         plan_lookup[norm(p.name)]         = p.name
+
+        new_rows              = []
+        still_missing_domains = []
+        still_missing_subs    = []
+
+        for line in lines[data_start_idx:]:
+            if not line:
+                continue
+            cols = parse_line(line)
+            if not cols:
+                continue
+
+            domain = cols[0].strip()
+            if not domain or '.' not in domain:
+                continue
+
+            raw_sub           = cols[1].strip() if len(cols) > 1 else ''
+            subscription_text = unicodedata.normalize('NFKC', raw_sub)
+            subscription_text = ' '.join(subscription_text.split())
+            if not subscription_text:
+                continue
+
+            if (norm(domain), norm(subscription_text)) in existing_combos:
+                continue
+
+            if not frappe.db.exists('Domains', domain):
+                if domain not in still_missing_domains:
+                    still_missing_domains.append(domain)
+                continue
+
+            plan_doc_name = plan_lookup.get(norm(subscription_text))
+            if not plan_doc_name:
+                if subscription_text not in still_missing_subs:
+                    still_missing_subs.append(subscription_text)
+                continue
+
+            new_rows.append({
+                'doctype':      'Purchase Invoice Items',
+                'domain':       domain,
+                'subscription': subscription_text,
+                'description':  cols[2].strip() if len(cols) > 2 else '',
+                'order_name':   cols[3].strip() if len(cols) > 3 else '',
+                'start_date':   parse_date_short(cols[4] if len(cols) > 4 else '', invoice_date_str),
+                'end_date':     parse_date_short(cols[5] if len(cols) > 5 else '', invoice_date_str),
+                'quantity':     safe_int(cols[6]   if len(cols) > 6  else '0'),
+                'po_number':    cols[7].strip()    if len(cols) > 7  else '',
+                'amount':       parse_amount(cols[8] if len(cols) > 8 else '0'),
+                'customer_id':  cols[9].strip()    if len(cols) > 9  else '',
+                'sku_id':       cols[10].strip()   if len(cols) > 10 else '',
+            })
+
+        if not new_rows:
+            parts = ['No new rows to add.']
+            if still_missing_domains:
+                parts.append(f"Domains still missing: {', '.join(still_missing_domains)}")
+            if still_missing_subs:
+                parts.append(f"Subscriptions still missing: {', '.join(still_missing_subs)}")
+            return {
+                'success':               False,
+                'error':                 ' '.join(parts),
+                'still_missing_domains': still_missing_domains,
+                'still_missing_subs':    still_missing_subs
+            }
+
+        for row in new_rows:
+            doc.append('domain_details', row)
+
+        doc.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        return {
+            'success':               True,
+            'doc_name':              doc_name,
+            'added_rows':            len(new_rows),
+            'still_missing_domains': still_missing_domains,
+            'still_missing_subs':    still_missing_subs
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), 'Purchase Invoice Update Error')
+        return {'success': False, 'error': str(e)}
+
 
 def parse_line(line):
     try:
@@ -323,6 +446,16 @@ def parse_date_short(raw, invoice_date_str):
         mon = months.get(parts[1][:3].title(), '01')
         return f"{year}-{mon}-{day}"
     return None
+
+
+
+
+
+
+
+
+
+
 
 
 

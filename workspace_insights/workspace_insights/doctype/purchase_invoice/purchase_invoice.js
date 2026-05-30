@@ -16,7 +16,8 @@ frappe.ui.form.on('Purchase Invoice', {
 
     onload_post_render: function(frm) {
         setTimeout(() => setup_domain_search(frm), 500);
-    }
+    },
+
 });
 
 
@@ -159,7 +160,5 @@ function do_filter(frm, query, $count, $clear) {
     $count.text(`${shown} of ${total} rows`);
     $count.css('color', shown === 0 ? '#dc2626' : '#6b7280');
 }
-
-
 
 

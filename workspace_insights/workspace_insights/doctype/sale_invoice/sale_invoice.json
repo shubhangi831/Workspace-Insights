@@ -27,6 +27,7 @@
    "fieldname": "bill_to",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Bill to"
   },
   {
@@ -83,18 +84,17 @@
    "label": "Tax & Total"
   },
   {
+   "default": "18",
+   "description": "GST percentage to apply on subtotal",
    "fieldname": "gst_rate",
    "fieldtype": "Float",
-   "label": "GST Rate (%)",
-   "default": "18",
-   "description": "GST percentage to apply on subtotal"
+   "label": "GST Rate (%)"
   },
   {
    "fieldname": "subtotal",
    "fieldtype": "Currency",
    "label": "Subtotal",
-   "read_only": 1,
-   "in_list_view": 0
+   "read_only": 1
   },
   {
    "fieldname": "gst_amount",
@@ -103,16 +103,16 @@
    "read_only": 1
   },
   {
+   "bold": 1,
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "label": "Grand Total (with GST)",
-   "read_only": 1,
-   "bold": 1
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-05-08 18:20:05.556991",
+ "modified": "2026-05-21 16:42:41.364094",
  "modified_by": "Administrator",
  "module": "Workspace Insights",
  "name": "Sale Invoice",
