@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"CnkAE2mUVN\",\"type\":\"card\",\"data\":{\"card_name\":\"Workspace Analytics\",\"col\":4}},{\"id\":\"d95gxmvQ57\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Report</b></span>\",\"col\":12}},{\"id\":\"jhuEoi25j5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Workspace Analysis Report\",\"col\":3}},{\"id\":\"3M0UHunLwB\",\"type\":\"paragraph\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Dashboard</span>\",\"col\":12}},{\"id\":\"HNSvXrwuiB\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Workspace Dashboard\",\"col\":3}}]",
+ "content": "[{\"id\":\"CnkAE2mUVN\",\"type\":\"card\",\"data\":{\"card_name\":\"Workspace Analytics\",\"col\":4}},{\"id\":\"d95gxmvQ57\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Report</b></span>\",\"col\":12}},{\"id\":\"jhuEoi25j5\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Workspace Analysis Report\",\"col\":3}}]",
  "creation": "2026-05-09 12:55:19.309240",
  "custom_blocks": [],
  "docstatus": 0,
@@ -83,7 +83,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-05-19 16:43:06.766167",
+ "modified": "2026-05-28 14:02:22.295855",
  "modified_by": "Administrator",
  "module": "Workspace Insights",
  "name": "Tracker",
@@ -93,15 +93,8 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 28.0,
+ "sequence_id": 1.0,
  "shortcuts": [
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Workspace Dashboard",
-   "type": "URL",
-   "url": "/app/workspace-dashboard"
-  },
   {
    "color": "Grey",
    "doc_view": "List",

@@ -1,7 +1,5 @@
 frappe.listview_settings['Purchase Invoice'] = {
 	onload: function (listview) {
-		// Use setTimeout so this button renders AFTER Frappe's standard buttons
-		// (List View, refresh, ...) giving it the correct position
 		setTimeout(() => {
 			listview.page.add_button(__('📂 Import'), function () {
 				show_import_dialog(listview);
@@ -42,11 +40,19 @@ function show_import_dialog(listview) {
 			position: absolute; top: 0; left: 0;
 			width: 100%; height: 100%; opacity: 0; cursor: pointer;
 		}
-		.ws-files-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+		.ws-files-list {
+			display: flex; flex-direction: column; gap: 8px;
+			margin-bottom: 14px;
+			max-height: 280px; overflow-y: auto;
+			padding-right: 4px;
+		}
+		.ws-files-list::-webkit-scrollbar { width: 4px; }
+		.ws-files-list::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
 		.ws-file-item {
 			display: flex; align-items: center; gap: 10px;
 			background: #f0fdf4; border: 1.5px solid #86efac;
 			border-radius: 8px; padding: 10px 14px;
+			flex-shrink: 0;
 		}
 		.ws-file-ico {
 			width: 34px; height: 34px; border-radius: 7px; background: #dcfce7;
@@ -55,12 +61,13 @@ function show_import_dialog(listview) {
 		.ws-file-ico svg { width: 18px; height: 18px; stroke: #16a34a; fill: none; stroke-width: 2; }
 		.ws-file-nm  { font-size: 13px; font-weight: 600; color: #15803d; }
 		.ws-file-sz  { font-size: 11px; color: #6b7280; margin-top: 1px; }
-		.ws-file-del { margin-left: auto; cursor: pointer; color: #9ca3af; font-size: 22px; line-height: 1; }
+		.ws-file-del { margin-left: auto; cursor: pointer; color: #9ca3af; font-size: 22px; line-height: 1; flex-shrink: 0; }
 		.ws-file-del:hover { color: #ef4444; }
 		.ws-add-more {
 			border: 1.5px dashed #93c5fd; border-radius: 8px; padding: 10px;
 			text-align: center; color: #1a56db; font-size: 13px; font-weight: 600;
 			background: #eff6ff; transition: all .15s; cursor: pointer; position: relative;
+			flex-shrink: 0;
 		}
 		.ws-add-more:hover { background: #dbeafe; }
 		.ws-add-more input[type=file] {
@@ -80,7 +87,6 @@ function show_import_dialog(listview) {
 		document.head.appendChild(st);
 	}
 
-	// Accepted file types
 	const ACCEPTED_EXT = ['.csv', '.xlsx', '.xls'];
 
 	function is_valid_file(f) {
@@ -141,7 +147,6 @@ function show_import_dialog(listview) {
 
 	d.onhide = function () {
 		sel_files = [];
-		// Clear any pending timer so it doesn't conflict with next dialog open
 		if (d._attach_timer) {
 			clearTimeout(d._attach_timer);
 			d._attach_timer = null;
@@ -150,8 +155,6 @@ function show_import_dialog(listview) {
 	d.show();
 	d_wrapper = d.$wrapper;
 
-	// Use setTimeout (not setInterval) — runs once, no stale timer risk.
-	// Frappe renders dialog HTML synchronously so 150ms is always enough.
 	d._attach_timer = setTimeout(() => {
 		const mainInput = d_wrapper.find('#ws-fi-main')[0];
 		const dz        = d_wrapper.find('#ws-dz')[0];
@@ -255,13 +258,12 @@ function show_import_dialog(listview) {
 			if (progBar) progBar.style.width  = `${Math.round((i / total) * 85)}%`;
 
 			try {
-				// ── Read file based on type ───────────────────────
 				const { content, file_type } = await read_file_content(file);
 
 				const r = await new Promise(resolve => {
 					frappe.call({
 						method: 'workspace_insights.workspace_insights.doctype.purchase_invoice.purchase_invoice.import_workspace_csv_content',
-						args:   { csv_content: content, file_type },
+						args:   { csv_content: content, file_type, filename: file.name },
 						callback: resolve,
 						error:    resolve
 					});
@@ -282,13 +284,14 @@ function show_import_dialog(listview) {
 							invoice:               msg.invoice_number,
 							rows:                  msg.total_rows,
 							missing_domains:       msg.missing_domains       || [],
-							missing_subscriptions: msg.missing_subscriptions || []
+							missing_subscriptions: msg.missing_subscriptions || [],
+							content:               content,
+							file_type:             file_type
 						});
 					} else {
 						success.push({ file: file.name, doc: msg.name, invoice: msg.invoice_number, rows: msg.total_rows });
 					}
 				} else {
-					// ── Build readable error ──────────────────────
 					let err = (msg && msg.error) || 'Unknown error';
 					if (msg && msg.missing_domains && msg.missing_domains.length) {
 						err += `<br><br>
@@ -324,7 +327,6 @@ function read_file_content(file) {
 		const reader = new FileReader();
 
 		if (is_xlsx) {
-			// Read xlsx as ArrayBuffer → encode to base64 → Python uses openpyxl
 			reader.onload = e => {
 				const bytes  = new Uint8Array(e.target.result);
 				let   binary = '';
@@ -336,7 +338,6 @@ function read_file_content(file) {
 			reader.onerror = reject;
 			reader.readAsArrayBuffer(file);
 		} else {
-			// Read CSV as plain text
 			reader.onload  = e => resolve({ content: e.target.result, file_type: 'csv' });
 			reader.onerror = reject;
 			reader.readAsText(file, 'utf-8');
@@ -370,7 +371,7 @@ function show_results(success, partial, dupes, failed, listview) {
 	if (partial.length) {
 		html += `<div style="margin-bottom:12px;">
 			<div style="font-weight:700;color:#b45309;margin-bottom:6px;">⚠️ ${partial.length} file(s) imported with warnings:</div>`;
-		partial.forEach(r => {
+		partial.forEach((r, idx) => {
 			html += `<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:6px;padding:8px 12px;margin-bottom:4px;">
 				📄 <b>${r.file}</b><br>
 				<span style="color:#6b7280;">Invoice: <b>${r.invoice}</b> &nbsp;|&nbsp; ${r.rows} rows imported &nbsp;|&nbsp; Doc: <b>${r.doc}</b></span>`;
@@ -388,6 +389,15 @@ function show_results(success, partial, dupes, failed, listview) {
 					${r.missing_subscriptions.map(s => `<li>${s} — <a href="/app/subscription-plan/new-subscription-plan-1" target="_blank">Create plan</a></li>`).join('')}
 				</ul>`;
 			}
+
+			html += `<div style="margin-top:10px;">
+				<button class="btn btn-sm btn-primary ws-update-btn"
+				        data-idx="${idx}"
+				        style="font-size:12px;font-weight:600;">
+					🔄 Update — Add Skipped Rows to ${r.doc}
+				</button>
+				<span class="ws-update-status-${idx}" style="margin-left:10px;font-size:12px;color:#6b7280;"></span>
+			</div>`;
 
 			html += `</div>`;
 		});
@@ -421,14 +431,80 @@ function show_results(success, partial, dupes, failed, listview) {
 
 	html += '</div>';
 
-	frappe.msgprint({
-		title:     `Import Results — ${success.length + partial.length + dupes.length + failed.length} file(s)`,
-		message:   html,
-		indicator: success.length || partial.length ? 'green' : (dupes.length ? 'orange' : 'red')
+	const result_dialog = new frappe.ui.Dialog({
+		title:  `Import Results — ${success.length + partial.length + dupes.length + failed.length} file(s)`,
+		fields: [{ fieldname: 'body', fieldtype: 'HTML',
+		           options: `<div style="max-height:460px;overflow-y:auto;padding-right:6px;">${html}</div>` }],
+		size:   'large'
 	});
+	result_dialog.show();
+
+	// ── Bind Update button click ──────────────────────────────────
+	setTimeout(() => {
+		$(result_dialog.$wrapper || document).find('.ws-update-btn').on('click', function () {
+			const idx     = parseInt($(this).data('idx'));
+			const r       = partial[idx];
+			const $btn    = $(this);
+			const $status = $(`.ws-update-status-${idx}`);
+
+			$btn.prop('disabled', true).text('Updating...');
+			$status.text('').css('color', '#6b7280');
+
+			frappe.call({
+				method: 'workspace_insights.workspace_insights.doctype.purchase_invoice.purchase_invoice.update_purchase_invoice',
+				args: {
+					doc_name:    r.doc,
+					csv_content: r.content,
+					file_type:   r.file_type
+				},
+				callback: function (res) {
+					const msg = res && res.message;
+					if (msg && msg.success) {
+						$btn.text('✅ Updated').css('background', '#15803d');
+
+						// ── Update partial record with remaining missing items ──
+						r.missing_domains       = msg.still_missing_domains || [];
+						r.missing_subscriptions = msg.still_missing_subs    || [];
+
+						let status_txt = `${msg.added_rows} row(s) added to ${r.doc}`;
+						if (r.missing_domains.length)
+							status_txt += ` | Still missing domains: ${r.missing_domains.join(', ')}`;
+						if (r.missing_subscriptions.length)
+							status_txt += ` | Still missing subscriptions: ${r.missing_subscriptions.join(', ')}`;
+						$status.text(status_txt).css('color', '#15803d');
+
+						frappe.show_alert({ message: `✅ ${msg.added_rows} row(s) added to ${r.doc}`, indicator: 'green' }, 5);
+						listview.refresh();
+
+						// Re-enable button if this file still has missing items
+						if (r.missing_domains.length || r.missing_subscriptions.length) {
+							$btn.prop('disabled', false).text('🔄 Update Again');
+						}
+
+						// ── Dialog sirf tab band karo jab SAARI partial files done hon ──
+						const all_done = partial.every(p =>
+							p.missing_domains.length === 0 && p.missing_subscriptions.length === 0
+						);
+						if (all_done) {
+							frappe.show_alert({ message: '✅ All files updated successfully!', indicator: 'green' }, 3);
+							setTimeout(() => { result_dialog.hide(); }, 1500);
+						}
+					} else {
+						$btn.prop('disabled', false).text('🔄 Update — Add Skipped Rows');
+						const err_txt = (msg && msg.error) || 'Update failed';
+						$status.text(err_txt).css('color', '#dc2626');
+						frappe.show_alert({ message: `❌ ${err_txt}`, indicator: 'red' }, 5);
+					}
+				}
+			});
+		});
+	}, 300);
 
 	listview.refresh();
 }
+
+
+
 
 
 
